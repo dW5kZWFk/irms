@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="d-flex flex-column bg-white border justify-content-center align-items-center border-secondary m-3">
+<div class="container-fluid m-3">
+
+
+{%if users%}
+ <fieldset class="content mt-3" >
+        <legend> Benutzer-Übersicht: </legend>
+
+        <div id="ajax_resp_values" class="container-fluid">
+
+
+        </div>
+
+        <div class="container-fluid">
+
+            {% for user in users %}
+
+            {% if user.ID == current_user.user_id or user.name == 'admin'%}
+
+            <div class="row mt-5 {% if user.ID == current_user.user_id %} border-bottom border-muted {%endif%}">
+
+                        {% if user.name != 'admin' %}
+                        <div class="col-lg-1">{{user.ID}}</div>
+                        {%endif%}
+                        <div class="col-lg-1 fs-5"><b>{{user.name}}</b></div>
+
+                        <div class="col-lg-2">
+                                 <b>Admin-Rechte:</b>
+                                 {% if user.admin==1 %} Ja {%else%} Nein {%endif%}
+                        </div>
+                        <div class="col-lg-1"></div>
+
+                        {% if user.name != 'admin' %}
+                        <div class="col-lg-2 text-start">
+                                <button class="btn-dark" value="{{user.ID}}" type="button" data-bs-toggle="modal" data-bs-target="#update_password{{user.ID}}">
+                                    Passwort ändern
+                                    <i class="feather-16" data-feather="edit"></i>
+                                </button>
+                        </div>
+
+                        <!-- Modal is in loop to pass ids ... i couldn't think of another solution-->
+                        <div class="modal fade" id="update_password{{user.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" >Password von {{user.name}} ändern</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+
+                              <form method="post">
+                              <div class="modal-body">
+
+                              <div class="modal-footer justify-content-between">
+                                    {{form.hidden_tag()}}
+                                    <div class="form-group">
+                                        {{ form.old_password.label(class="form-control-label mt-4 h6") }}
+                                        {% if form.old_password.errors %}
+                                            {{ form.old_password(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.old_password.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.old_password(class="form-control form-control-lg border border-dark") }}
+                                        {% endif %}
+                                    </div>
+
+                                        <div class="form-group">
+                                        {{ form.new_password.label(class="form-control-label mt-4 h6") }}
+                                        {% if form.new_password.errors %}
+                                            {{ form.new_password(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.new_password.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.new_password(class="form-control form-control-lg border border-dark") }}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="form-group ">
+                                        {{ form.confirm_new_password.label(class="form-control-label mt-4 h6") }}
+                                        {% if form.confirm_new_password.errors %}
+                                            {{ form.confirm_new_password(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.confirm_new_password.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.confirm_new_password(class="form-control form-control-lg border border-dark") }}
+                                        {% endif %}
+                                    </div>
+                                    </div>
+                                    <div class="row mt-3 align-items-baseline">
+                                        <input type="hidden" name="user_id" value="{{user.ID}}">
+                                        <div class="col-lg-3 ms-3"> <button type="submit" name="change_password" class="btn btn-light" >{{ form.submit(class="btn btn-outline-dark") }}</button> </div>
+                                        <div class="col-lg-1"></div>
+                                        <div class="col-lg-3"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button> </div>
+                                        <div class="col-lg-5"></div>
+                                    </div>
+
+                              </div>
+                              </form>
+                            </div>
+                          </div>
+
+                        {% endif %}
+
+                        <div class="col-lg-2"></div>
+                        <!--<div class="col-lg-2">
+                            <form method="POST" name="del_service">
+                                <button class="btn-danger" onclick="delete_myself();" value={{user.ID}} type="submit">
+                                    mich löschen?
+                                    <i class="feather-16" data-feather="trash-2"></i>
+                                </button>
+                            </form>
+                        </div> -->
+            </div>
+            {%endif%}
+            {%endfor%}
+
+
+            {% for user in users %}
+
+            {% if user.ID != current_user.user_id and user.name != 'admin' and user.name != 'automatic'%}
+
+
+                    <div class="row mt-5">
+
+                        <div class="col-lg-1">{{user.ID}}</div>
+                        <div class="col-lg-1 fs-5"><b>{{user.name}}</b></div>
+
+                        <div class="col-lg-2">
+
+                            <form method="post">
+                            <button value="{{user.ID}}" name="admin_rights" class="{% if user.admin==1 %} btn-danger {%else%} btn-success {%endif%} " type="submit" {% if user.admin==1 %} onclick="remove_admin();" {%else%} onclick="grant_admin();" {%endif%}>
+                                 <i class="feather-16" {% if user.admin==1 %} data-feather="shield" {%else%} data-feather="shield-off" {%endif%}></i>
+                                 {% if user.admin==1 %}
+                                    Admin
+                                <input type="hidden" name="remove_admin">
+                                 {%else%}
+                                    kein Admin
+                                <input type="hidden" name="grant_admin">
+                                 {%endif%}
+                            </button>
+                            </form>
+                        </div>
+                        <div class="col-lg-1"></div>
+                        <div class="col-lg-2 ms-2">
+                                <button class="btn-dark" value="{{user.ID}}" type="button" data-bs-toggle="modal" data-bs-target="#main_update_password{{user.ID}}">
+                                    Passwort ändern
+                                    <i class="feather-16" data-feather="edit"></i>
+                                </button>
+                        </div>
+
+                        <!-- Modal is in loop to pass ids ... i couldn't think of another solution-->
+                        <div class="modal fade" id="main_update_password{{user.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" >Password von {{user.name}} ändern</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+
+                              <form method="post">
+                              <div class="modal-body">
+
+                              <div class="modal-footer justify-content-between">
+                                {{form.hidden_tag()}}
+                                    <div class="form-group">
+                                        {{ form.old_password.label(class="form-control-label mt-4 h6") }}
+                                        {% if form.old_password.errors %}
+                                            {{ form.old_password(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.old_password.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.old_password(class="form-control form-control-lg border border-dark") }}
+                                        {% endif %}
+                                    </div>
+
+                                        <div class="form-group">
+                                        {{ form.new_password.label(class="form-control-label mt-4 h6") }}
+                                        {% if form.new_password.errors %}
+                                            {{ form.new_password(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.new_password.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.new_password(class="form-control form-control-lg border border-dark") }}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="form-group ">
+                                        {{ form.confirm_new_password.label(class="form-control-label mt-4 h6") }}
+                                        {% if form.confirm_new_password.errors %}
+                                            {{ form.confirm_new_password(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.confirm_new_password.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.confirm_new_password(class="form-control form-control-lg border border-dark") }}
+                                        {% endif %}
+                                    </div>
+                                    </div>
+                                    <div class="row mt-3 align-items-baseline">
+                                        <input type="hidden" name="user_id" value="{{user.ID}}">
+                                        <div class="col-lg-3 ms-3"><button type="submit" name="change_password" class="btn btn-light" >{{ form.submit(class="btn btn-outline-dark") }}</button> </div>
+                                        <div class="col-lg-1"></div>
+                                        <div class="col-lg-3"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button> </div>
+                                        <div class="col-lg-5"></div>
+                                    </div>
+
+                              </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-lg-2">
+                                <button class="btn-danger" name="delete_button" value="{{user.ID}}" type="button" data-bs-toggle="modal" data-bs-target="#delete{{user.ID}}">
+                                    Benutzer löschen
+                                    <i class="feather-16" data-feather="trash-2"></i>
+                                </button>
+                        </div>
+
+                        <!-- Modal is in loop to pass ids ... i couldn't think of another solution-->
+                        <div class="modal fade" id="delete{{user.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" >Benutzer löschen</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+
+                              <div class="modal-body">
+                                  <p class="h6"> Soll der Benutzer <b> {{user.name}} (ID: {{user.ID}}) </b> wirklich gelöscht werden?</p>
+
+                              </div>
+                              <div class="modal-footer justify-content-between">
+                                <form method="post">
+                                    <input type="hidden" name="user_id" id="user_id" value="{{user.ID}}">
+                                    <button type="submit" name="delete_user" class="btn btn-danger">Benutzer löschen</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+
+                    </div>
+
+            {%endif%}
+            {%endfor%}
+                </div>
+
+        <div class="row mt-5 mb-5 ms-2">
+
+            <div class="col-lg-2">
+                <form action="{{ url_for('auth_bp.add_user') }}">
+                    <button  type="submit" class="btn btn-primary"> <i class="feather-16" data-feather="plus-circle"></i>  Benutzer hinzufügen </button>
+                </form>
+            </div>
+                    <div class="col-lg-4"></div>
+            <div class="col-lg-5">
+            </div>
+
+        </div>
+
+    </fieldset>
+{%endif%}
+
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+$('#delete_button').click(function() {
+console.log(this.val);
+ $('#user_id').attr('value',this.val);
+});
+});
+
+function delete_myself(){
+alert("Bitte einen anderen Nutzer mit Admin-Rechten darum dich zu löschen.");
+window.confirm("sometext");
+}
+
+</script>
+
+{%endblock%}

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container-fluid bg-white border border-dark m-3">
+   <!-- <div class="row">
+        <div class="col-lg-2 h6">ID</div>
+        <div class="col-lg-2 h6">Einnahmen</div>
+        <div class="col-lg-4 h6">Datum</div>
+        <div class="col-lg-4 h6">.aaaaah</div>
+    </div> -->
+
+{% if sales_dict %}
+    <div class="row mt-2 mb-3 d-flex align-items-center">
+
+    <div class="col">
+        {% if pagination is defined and pagination.links != '' %} {{ pagination.info | safe }} {%endif%}
+    </div>
+
+    <div class="col">
+
+        {%if last_date is defined or last_id is defined%}
+        <form action="{{ url_for('purchase_sale_bp.sales')}}">
+            <button type="submit" class="btn btn-primary">alle anzeigen</button>
+
+        </form>
+        {%endif%}
+
+    </div>
+
+    <div class="col">
+
+        <form method="get">
+        <div class="input-group">
+
+            <div class="form-outline">
+              <input type="date" name="date" {%if last_date is defined%} value="{{last_date}}" {%endif%} class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="feather-16 text-white" data-feather="search"></i>
+            </button>
+
+        </div>
+        </form>
+    </div>
+
+    <div class="col-lg-3">
+        <form method="get">
+        <div class="input-group ">
+            <div class="form-outline">
+              <input type="search" name="id" class="form-control " {%if last_id is defined%} value="{{last_id}}" {%endif%} placeholder="Verkauf-ID" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="feather-16 text-white" data-feather="search"></i>
+            </button>
+        </div>
+        </form>
+    </div>
+
+    </div>
+    {% for sale in sales_dict %}
+
+        <div class="row mt-3 pb-3 border-bottom border-dark">
+            <div class="small">{% if pagination is defined %} {{loop.index + pagination.skip}} {%endif%}</div>
+            <div class="col-lg-2 text-center ">Verkauf-ID: {{sale.ID}}</div>
+            <div class="col-lg-2 text-center ">{{sale.price}} €</div>
+            <div class="col-lg-4 text-center "><b>{{sale.date}}</b></div>
+            <div class="col-lg-4 text-center "> {{sale.description_short}} <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#show_description{{sale.ID}}">
+                                             <i class="feather-16" data-feather="zoom-in"></i> Beschreibung anzeigen
+                                                </button>
+            </div>
+
+        </div>
+                <!-- Modal -->
+                <div class="modal fade" id="show_description{{sale.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Beschreibung Verkauf {{sale.ID}}</h5>
+                        <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body" id="description_content{{sale.ID}}">
+                          {% autoescape false %}
+                        {{ sale.description | replace("\n", "<br/>")}}
+                          {% endautoescape %}
+
+                      </div>
+                      <div class="modal-footer">
+                          <button class="btn btn-outline-dark" value="{{sale.ID}}" onclick="print_description(this.value);" type="button"><i class="feather-24" data-feather="printer"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+    {%endfor%}
+      <div class="d-flex mt-3 float-start">  {% if pagination is defined %} {{ pagination.links }} {%endif%} </div>
+
+{%else%}
+    <p>Es wurden noch keine Verkäufe abgeschlossen.</p>
+{%endif%}
+
+</div>
+
+<script type="text/javascript" src="{{url_for('static',filename='js/print.js')}}"></script>
+
+<script type="text/javascript">
+
+function print_description(sale_id){
+   printJS('description_content'+sale_id, 'html');
+}
+
+</script>
+{%endblock%}

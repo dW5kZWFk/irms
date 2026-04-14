@@ -1,0 +1,574 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+
+
+<div class="d-flex w-25 pt-3" id="div1">
+<select class="form-select w-100 border border-secondary" aria-label="Default select example" id="kategorie">
+	<option value="anderes">Geräte</option>
+	<option value="ersatzteile"> Ersatzteile </option>
+	<option value="zubehoer"> Zubehör </option>
+</select>
+</div>
+<p></p>
+
+
+
+<!-- ersatzteile ----------------------------------------------------------------------------------------------------->
+
+<div id="input_ersatzteil" style="display:none;" class="form-group bg-white border border-secondary">
+		<p class="h3 text-center pt-2">Ersatzteile</p>
+
+<form class="form-inline" method="POST">
+
+<input type="hidden" name="kategorie" value="ersatzteile">
+
+		<div class="container-fluid">
+							  <div class="row pb-3">
+										<div class="col-lg-3 " id="et_selection"> </div>
+								  		<div class="col-lg-4 padding_grid_col" > </div>
+								  		<div class="col-lg-5 " > </div>
+                              </div>
+                              <div class="row pb-3 ">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Top-Kategorie </label> </div>
+                                    	<div class="col-lg-4 padding_grid_col" id="et_top_kat_selection"> </div>
+								  		<div class="col-lg-5 " > </div>
+
+                              </div>
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6">Kategorie </label> </div>
+										<div class="col-lg-4 padding_grid_col" id="et_sub_kat_selection"> </div>
+										<div class="col-lg-5 " id="et_sub_kat_neu"> </div>
+
+                              </div>
+							  <div id="et_bottom"> </div>
+		</div>
+</form>
+
+</div>
+
+<!-- zubehoer ----------------------------------------------------------------------------------------------------->
+<div id="input_zubehoer" class="form-group bg-white border border-secondary" style="display:none;">
+		<p class="h3 text-center pt-2">Zubehör</p>
+
+<form class="form-inline" method="POST">
+	<input type="hidden" name="kategorie" value="zubehoer">
+		<div class="container-fluid">
+							  <div class="row me-2 pb-3">
+										<div class="col-lg-3 " id="zb_selection"> </div>
+								  		<div class="col-lg-4 padding_grid_col" > </div>
+								  		<div class="col-lg-5 " > </div>
+                              </div>
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Top-Kategorie </label> </div>
+                                    	<div class="col-lg-4 padding_grid_col" id="zb_top_kat_selection"> </div>
+								  		<div class="col-lg-5 " > </div>
+
+                              </div>
+                              <div class="row pb-3">
+										<div class="col-lg-3 text-end"> <label class="form-label h6">Kategorie </label> </div>
+										<div class="col-lg-4 padding_grid_col" id="zb_sub_kat_selection"> </div>
+										<div class="col-lg-5 " id="zb_sub_kat_neu"> </div>
+
+                              </div>
+
+							  <div id="zb_bottom"> </div>
+		</div>
+</form>
+</div>
+
+<!-- anderes -------------------------------------------------------------------------------------------------------->
+
+<div id="input_anderes" style="display:none;" class="form-group bg-white border border-secondary">
+
+<form class="form-inline" method="POST">
+<input type="hidden" name="kategorie" value="anderes">
+		<div class="container-fluid">
+                              <div class="row mt-3 pb-3">
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Top-Kategorie </label> </div>
+                                    	<div class="col-lg-4 padding_grid_col" id="a_top_kat_selection"> </div>
+								  		<div class="col-lg-5" > </div>
+                              </div>
+                              <div class="row pb-3">
+										<div class="col-lg-3 text-end"> <label class="form-label h6">Kategorie </label> </div>
+										<div class="col-lg-4 padding_grid_col" id="a_sub_kat_selection" > </div>
+										<div class="col-lg-5 " id="a_sub_kat_neu" > </div>
+                              </div>
+
+			 				  <div id="a_bottom"> </div>
+		</div>
+</form>
+</div>
+
+
+<!-------------------------------------------------------------------------------------------------------------------->
+
+<script type="text/javascript">
+//src="{{ url_for('static', filename='input_values.js') }}"
+
+$(document).ready(function() {
+
+	set_form($('#kategorie').val());
+	get_warehouse_box_numbers();
+});
+
+bottom= `
+			                  <div class="row pb-3">
+                              		<div class="col-lg-3 text-end"> <label class="form-label h6"> Bezeichnung </label> </div>
+								    <div class="col-lg-4 padding_grid_col"> <input class="form-control border border-secondary" type="text" placeholder="" name="bez_input" onblur="this.value=removeSpaces(this.value);"> </div>
+								    <div class="col-lg-5 " > </div>
+                              </div>
+                              <div class="row pb-3">
+                              		<div class="col-lg-3 text-end"> <label class="form-label h6"> Seriennummer </label> </div>
+								    <div class="col-lg-4 padding_grid_col"> <input class="form-control border border-secondary" name="serial_number_input" rows="5"> </textarea></div>
+								    <div class="col-lg-5 " > </div>
+                              </div>
+                              <div class="row pb-3">
+                              		<div class="col-lg-3 text-end"> <label for="description-input" class="form-label h6"> Beschreibung </label> </div>
+								    <div class="col-lg-4 padding_grid_col"> <textarea class="form-control border border-secondary" id="description-input" name="description_input" rows="5"></textarea></div>
+								    <div class="col-lg-5 " > </div>
+                              </div>
+                              <div class="row pb-3">
+                              		<div class="col-lg-3 text-end"> <label class="form-label h6"> Lager - Kisten-ID </label></div>
+                              		<div class="col-lg-4" id="warehouse_selection"> </div>
+                              		<div class="col-lg-5"> </div>
+                              </div>
+                              <div class="row pb-3">
+                              		<div class="col-lg-3 text-end"> <label class="form-label h6"> Preis (pro Stk.) (€)</label></div>
+                              		<div class="col-lg-4 padding_grid_col"> <input class="form-control border border-secondary" name="price" value="0,00" type="text" pattern="[0-9]{1,4},[0-9]{2}"></div>
+                              		<div class="col-lg-5"> </div>
+                              </div>
+
+                              <div class="row pb-3">
+                              		<div class="col-lg-3 text-end"> <label class="form-label h6">Status</label> </div>
+									<div class="col-auto col-lg-4 "> <select class="form-select border border-secondary" name="status">
+											<option value="funktioniert" selected>funktioniert</option>
+											<option value="reparierbar">reparierbar</option>
+											<option value="ungeprüft">ungeprüft</option>
+										</select> </div>
+									<div class="col-lg-5 border_grid_col"> </div>
+                              </div>
+
+							  <div class="row pb-3">
+										<div class="col-lg-3 text-end"> <label class="form-label h6">Anzahl</label> </div>
+									<div class="d-flex col-auto col-lg-3  justify-content-between">
+									 	<select class="bg-white" name="anzahl" id="numbers"> </select>
+									 	&nbsp;<button type="submit" class="me-2 btn btn-success"><i class="size-24" data-feather="check-circle" ></i> Hinzufügen</button>
+									</div>
+									<div class="col-lg-6"> </div>
+							  </div>`
+
+$('#kategorie').change(function(){
+    hide_all();
+	set_form($('#kategorie').val());
+	get_warehouse_box_numbers();
+
+});// eo on change
+
+function set_form(lang){
+	switch(lang) {
+		case "ersatzteile":
+			$('#input_ersatzteil').show();
+			$('#et_bottom').html(bottom);
+			feather.replace()
+			start_et_ajax();
+			break;
+		case "zubehoer":
+			$('#input_zubehoer').show();
+			$('#zb_bottom').html(bottom);
+			feather.replace()
+			start_zb_ajax();
+			break;
+		case "anderes":
+			$('#input_anderes').show();
+			$('#a_bottom').html(bottom);
+			feather.replace()
+			a_top_kat();
+			break;
+		default:
+			console.log("none");
+	}
+		set_numbers();
+}
+
+//ersatzteile----------------------------------------------------------------------------------------------------------------------
+function start_et_ajax(){
+
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: $('#kategorie').val()},
+					success: function(resp){
+						if(resp !=0){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="et_top_kat(this.value)", id="ersatzteile_et" name="ersatzteile_et">`;
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+						}
+						html_str+="</select>";
+
+						$('#et_selection').html(html_str);
+						et_top_kat(resp[0]);
+		  			}
+	});
+
+}
+
+
+function et_top_kat(val){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {et: val},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="et_sub_kat(this.value); " name="ersatzteile_top_kat">`;
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#et_top_kat_selection').html(html_str);
+						et_sub_kat(resp[0]);
+		  			}
+	});
+}
+
+function et_sub_kat(val){
+
+		$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {et_top_kat: val, et_for_top_kat: $('#ersatzteile_et').val()},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="et_bez(this.value);" name="ersatzteile_sub_kat">`;
+								html_str += "<option value=\"neu\" selected> Neu </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#et_sub_kat_selection').html(html_str);
+						$('#et_sub_kat_neu').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="et_sub_kat_input" onblur="this.value=removeSpaces(this.value);" >`);
+						et_bez('neu');
+		  			}
+		});
+}
+
+function et_bez(val){
+	if(val=='neu'){
+		$('#et_sub_kat_neu').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="et_sub_kat_input" onblur="this.value=removeSpaces(this.value);">`);
+	}else{
+		$('#et_sub_kat_neu').html("");
+	} //eo else
+} // eo function
+
+
+
+//zubehör--------------------------------------------------------------------------------------------------------------------------
+
+function start_zb_ajax(){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: $('#kategorie').val()},
+					success: function(resp){
+						if(resp !=0){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="zb_top_kat(this.value)" id="zubehoer_zb" name="zubehoer_zb">`;
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+						}
+						html_str+="</select>";
+
+						$('#zb_selection').html(html_str);
+						zb_top_kat(resp[0]);
+		  			}
+	});
+}
+
+function zb_top_kat(val){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {zb: val},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="zb_sub_kat(this.value)" name="zubehoer_top_kat">`;
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#zb_top_kat_selection').html(html_str);
+						zb_sub_kat(resp[0]);
+		  			}
+	});
+}
+
+function zb_sub_kat(val){
+
+		$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {zb_top_kat: val, zb_for_top_kat: $('#zubehoer_zb').val()},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="zb_bez(this.value);" name="zubehoer_sub_kat">`;
+								html_str += "<option value=\"neu\" selected> Neu </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#zb_sub_kat_selection').html(html_str);
+						$('#zb_sub_kat_neu').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="zb_sub_kat_input" onblur="this.value=removeSpaces(this.value);" >`);
+						zb_bez('neu');
+		  			}
+		});
+}
+
+function zb_bez(val){
+	if(val=='neu'){
+		$('#zb_sub_kat_neu').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="zb_sub_kat_input" onblur="this.value=removeSpaces(this.value);" >`);
+	}else{
+		$('#zb_sub_kat_neu').html("");
+	}
+}
+//sonstiges-------------------------------------------------------------------------------------------------------------
+
+// leben macht keinen sinn mehr, einfach schlafen gehen
+//https://stackoverflow.com/questions/62340900/change-event-inside-ajax-success-function
+
+function a_top_kat(){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: $('#kategorie').val()},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="a_sub_kat_ajax(this.value)" name="anderes_top_kat">`;
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#a_top_kat_selection').html(html_str);
+						a_sub_kat_ajax(resp[0]);
+		  			}
+	});
+}
+
+function a_sub_kat_ajax(val){
+
+		$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {a_top_kat: val},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="a_bez(this.value);" name="a_sub_kat">`;
+								html_str += "<option value=\"neu\" selected> Neu </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#a_sub_kat_selection').html(html_str);
+						$('#a_sub_kat_neu').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="a_sub_kat_input"  onblur="this.value=removeSpaces(this.value);" >`);
+						a_bez('neu');
+		  			}
+		});
+}
+
+function a_bez(val){
+	if(val=='neu'){
+		$('#a_sub_kat_neu').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="a_sub_kat_input" onblur="this.value=removeSpaces(this.value);">`);
+	}else{
+		$('#a_sub_kat_neu').html("");
+	}
+}
+
+//warehouse-------------------------------------------------------------------------------------------------------------
+
+function get_warehouse_box_numbers(){
+
+$.ajax({
+					url: "{{ url_for( 'warehouse_bp.get_warehouse_box_numbers_ajax' ) }}",
+					type: "GET",
+					data: {go: 1},
+					success: function(resp){
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener  'Fach-ID' Einträge vom Server (get_warehouse_box_numbers_ajax)");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" name="warehouse_box_number">`;
+							html_str += `<option value='' selected> - </option>`
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#warehouse_selection').html(html_str);
+		  			}
+		});
+}
+
+function set_numbers(){
+    var $select = $('#numbers');
+    for (i=1;i<=100;i++){
+        $select.append($('<option></option>').val(i).html(i));
+    }
+}
+
+function hide_all(){
+    $('#input_anderes').hide();
+	$('#input_ersatzteil').hide();
+	$('#input_zubehoer').hide();
+	$('#et_bottom').html('');
+	$('#zb_bottom').html('');
+	$('#a_bottom').html('');
+	$('#numbers').show('');
+}
+
+function removeSpaces(string) {
+ return string.split(' ').join('_');
+}
+
+
+</script>
+
+{%endblock%}

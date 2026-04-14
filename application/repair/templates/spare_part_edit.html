@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<fieldset class="add_customer m-3">
+
+     <div class="container-fluid">
+        <form method="POST">
+                <div class="row mb-3 mt-3">
+                    <div class="col-lg-3">
+                       Name:
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="edit_spare_part_name" {% if spare_part['name'] %}value="{{spare_part['name']}}" {%endif%} placeholder="" type="text" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3">
+                       Preis (€):
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="edit_spare_part_price" {% if spare_part['price'] %} value="{{spare_part['price']}}" {%else%} placeholder="10,00" {%endif%}  pattern="[0-9]{1,4},[0-9]{2}">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3">
+                       Bestellt bei:
+                    </div>
+                    <div class="col-lg-9">
+                       <input class="form-control border border-dark" name="edit_spare_part_vendor" {% if spare_part['vendor'] %} value="{{spare_part['vendor']}}" {%endif%} placeholder="">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-3">
+                       Beschreibung:
+                    </div>
+                    <div class="col-lg-9">
+                        <textarea class="form-control border border-dark" name="edit_spare_part_description" placeholder="" rows="3" >{% if spare_part['description'] %}{{spare_part['description']}}{%endif%}</textarea>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg-3"> </div>
+                    <div class="col-lg-9"> <button type="submit" class="btn btn-primary">Ändern</button></div>
+                </div>
+            </form>
+     </div>
+
+</fieldset>
+
+{% endblock %}

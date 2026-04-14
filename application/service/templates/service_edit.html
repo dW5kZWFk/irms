@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+
+        <fieldset class="small mt-3">
+ <br>
+
+            <div class="container-fluid">
+            <form method="POST">
+
+                <div class="row">
+                    <div class="col-lg-3 h5">
+                       Name:
+                    </div>
+                    <div class="col-lg-4">
+                        <input class="form-control border border-dark" name="new_service_name" value="{{service.name}}" required>
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h5">
+                       Beschreibung:
+                    </div>
+                    <div class="col-lg-4">
+                        <textarea class="form-control border border-dark" name="new_service_description" rows="5">{{service.description}}</textarea>
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h5">
+                        Preis (€):
+                    </div>
+                    <div class="col-lg-4">
+                        <input name="new_service_price" class="form-control" type="text" pattern="[0-9]{1,4},[0-9]{2}" value="{{service.price}}" placeholder="10,00" required>
+                    </div>
+                    <div class="col-lg-5"></div>
+                </div>
+<br><br>
+                <div class="row">
+                    <div class="col-lg-3"> </div>
+                    <div class="col-lg-9"> <button type="submit" class="btn btn-primary">Ändern</button></div>
+                </div>
+<br>
+            <input type="hidden" name="edit_service" value="1">
+            </form>
+            </div>
+
+
+{%endblock%}

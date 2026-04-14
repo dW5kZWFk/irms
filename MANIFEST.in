@@ -1,0 +1,12 @@
+recursive-include application/static *
+recursive-include application/auth/templates *
+recursive-include application/category/templates *
+recursive-include application/customer/templates *
+recursive-include application/home/templates *
+recursive-include application/inventory/templates *
+recursive-include application/purchase_sale/templates *
+recursive-include application/repair/templates *
+recursive-include application/service/templates *
+recursive-include application/templates *
+recursive-include application/upload/templates *
+recursive-include application/warehouse/templates *

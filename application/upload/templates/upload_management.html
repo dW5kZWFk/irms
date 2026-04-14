@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+
+<fieldset class="container-fluid bg-white mt-3">
+
+    <div class="row mt-3">
+
+         <div class="col-lg-3 ms-3 ">
+            <form method="get">
+            <div class="input-group ">
+                <div class="form-outline">
+                  <input type="search" name="id" class="form-control " {%if last_id is defined%} value="{{last_id}}" {%endif%} placeholder="Upload-ID" />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="feather-16 text-white" data-feather="search"></i>
+                </button>
+            </div>
+            </form>
+        </div>
+
+        <div class="col-lg-3 ">
+            <form method="get">
+            <div class="input-group ">
+                <div class="form-outline">
+                  <input type="search" name="item_id" class="form-control " {%if last_item_id is defined%} value="{{last_item_id}}" {%endif%} placeholder="Item-ID" />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="feather-16 text-white" data-feather="search"></i>
+                </button>
+            </div>
+            </form>
+        </div>
+
+        <div class="col-lg-2"></div>
+
+        <div class="col-lg-2">
+            {%if last_id is defined or last_item_id is defined%}
+            <form action="{{url_for('upload_bp.upload_management')}}">
+                <button type="submit" class="btn btn-primary">alle anzeigen</button>
+            </form>
+            {%endif%}
+        </div>
+
+        <div class="col-lg-1 text-end">
+            <button type="button" class="btn btn-light float-end " data-bs-toggle="modal" data-bs-target="#show_info_path">
+                <i class="feather-24" data-feather="help-circle"></i>
+            </button>
+        </div>
+    </div>
+
+    <p class="h3 text-center mt-3"> Uploads</p>
+
+    <div class="d-flex flex-row justify-content-between align-items-center">
+
+        <div class="col ms-3 float-start">
+            {% if pagination is defined and pagination.links != '' %} {{ pagination.info | safe }} {%endif%}
+        </div>
+
+    </div>
+
+        <div class="mt-5 container-fluid">
+            {% for upload in uploads %}
+                <div class="row">
+
+                    <div class="col-lg-1">ID: {{upload.ID}}</div>
+                    <div class="col-lg-5"><b>{{upload.name}}</b></div>
+                    <div class="col-lg-2"></div>
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-1"></div>
+
+                </div>
+
+                <div class="row mb-3">
+
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-3">{{upload.description}}</div>
+                    <div class="col-lg-2">{{upload.date}}</div>
+                    <div class="col-lg-2">{{upload.price}} €</div>
+                    <div class="col-lg-1">
+                        <!-- <form action="{{ url_for('home_bp.dashboard', s_id=upload.ID) }}">
+                            <button class="btn btn-primary" type="submit" value="edit">
+                                <i class="feather-16" data-feather="edit"></i>
+                            </button>
+                        </form> -->
+                    </div>
+
+                    <div class="col-lg-1">
+                            <button class="btn btn-outline-dark" type="button" value="{{upload.ID}}" onclick="display_items(this.value, {% if upload.id_shop_order is none %}0{%else%} 1 {%endif%}, {{upload.number_items}} );" >
+                                {% if upload.number_items == 1 %}
+                                    1 Item
+                                {%else %}
+                                {{upload.number_items}} Items
+                                {%endif%}
+                                <i class="feather-16" data-feather="zoom-in">Items</i>
+                            </button>
+                    </div>
+
+                    <div class="col-lg-1 d-flex align-items-baseline">
+                        {% if upload.id_shop_order is none %}
+                        <form action="{{url_for("upload_bp.upload_edit", u_id=upload.ID)}}">
+                            <button class="btn btn-primary me-3" type="submit">
+                                <i class="feather-16" data-feather="edit"></i>
+                            </button>
+                        </form>
+
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_upload{{upload.ID}}" type="button">
+                                <i class="feather-16" data-feather="trash-2"></i>
+                        </button>
+                        {%else%}
+                            (bestellt)
+                        {%endif%}
+
+                    </div>
+
+                </div>
+
+
+                <!-- Modal delete Order-->
+                <div class="modal fade" id="delete_upload{{upload.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" >Sicherheitsabfrage</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Soll der Upload (ID: {{upload.ID}}) wirklich entfernt werden?
+                        (Enthaltene Items werden dem Inventar wieder hinzugefügt.)
+                      </div>
+                      <div class="modal-footer">
+                        <form method="POST">
+                            <button type="submit" name="delete_button" value="{{upload.ID}}" class="btn btn-danger">Ja</button>
+                        </form>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nein</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            {% endfor%}
+            <div class="d-flex mt-3 float-start">  {% if pagination is defined %} {{ pagination.links }} {%endif%} </div>
+        </div>
+
+
+            <!-- Modal show Items -->
+                <div class="modal fade" id="show_items" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" >Items:</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div id="changeme"></div>
+                      </div>
+                      <div class="modal-footer">
+                            <button type="button" name="delete_button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">OK</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+</fieldset>
+
+
+<!-- Modal show_info_path -->
+<div class="modal fade" id="show_info_path" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Das Verzeichnis für die Bilder ist zu finden unter: <br><br>
+          <ul>
+              <li> <b> ./static/noporn/upload_&lt;upload_id&gt; </b></li>
+              (z.B. ./static/noporn/upload_1)
+          </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+function display_items(u_id, id_order, number_items){
+
+$.ajax({
+				url: "{{ url_for( 'inventory_bp.ajax_get_online_items' ) }}",
+				type: "GET",
+				data: {'u_id': u_id},
+				success: function(resp){
+
+                    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen der Items. (ajax_get_online_items)");
+                                return;
+					}
+
+
+                    if(resp != 'empty'){
+					html_str="";
+
+                        for(const element of resp){
+                            if ( ! element['Bezeichnung']) { bez=''; }else{ bez='('+element['Bezeichnung']+')';}
+					        html_str += "<div class=\"row mt-3\"> <div class=\"col-lg-10 col-md-10\"> <b>" + element['ID'] + '&nbsp;'+ element['first'] + '</b>&nbsp;' + element['Top-Kategorie'] + '&nbsp;' + element['Kategorie'] + '&nbsp;' +bez +"</div>";
+					        if (id_order==0 && number_items!=1){
+					            html_str += `<div class="col-lg-2 col-md-2"><button class="btn-danger" name="i_id" value="` +element['ID']+ `" type="button" onclick="clear_single_online_item(this.value,` + element['u_id']+ `);"><i class="feather-16" data-feather="delete"></i></button></div></div>`
+					        }
+					    }
+					    $('#show_items').modal('show');
+                        $('#changeme').html(html_str);
+					    feather.replace();
+					}else{
+					    $('#show_items').modal('show');
+					   $('#changeme').html('<p>Keine Items ausgewählt.</p>');
+                    }
+
+
+	  			}
+});
+
+
+}
+
+function clear_single_online_item(val, u_id){
+
+$.ajax({
+				url: "{{ url_for( 'inventory_bp.ajax_clear_single_online_item' ) }}",
+				type: "GET",
+				data: {'i_id': val, 'u_id': u_id},
+				success: function(resp){
+				    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim ändern der Upload ID des Items. (ajax_clear_single_item)");
+                                return;
+					}
+
+
+					if(resp=='not_available'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Der Upload ist bereits Teil einer Bestellung und kann nicht mehr bearbeitet werden.");
+                                return;
+					}
+
+					if(resp=='item_amount_error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Das letzte Item aus dem Upload kann nicht erntfernt werden.");
+                                return;
+					}
+
+					display_items(u_id);
+	  			}
+    });
+
+
+}
+
+</script>
+
+{%endblock%}

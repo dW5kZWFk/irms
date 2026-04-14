@@ -1,0 +1,697 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container bg-white border border-secondary mb-5 mt-3">
+
+<form method="POST" name="add_kat_form">
+<div class="container-fluid pt-3">
+                             <div class="row pb-3">    <p class="h3 text-center pt-3"> Kategorie hinzufügen </p> </div>
+                             <div class="row pb-3">
+
+                                    <div class="col-lg-3 text-end"> <label class="form-label h6">Top - Kategorie: </label> </div>
+                                    <div class="col-auto col-lg-4">
+                                        <select class="form-select border border-secondary" name="top_kat_selection" id="top_kat_selection">
+                                            <option value="neu"> Neu </option>
+                                            {% for key in kat_dict %}
+                                                <option value={{key}}>{{key}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-5" id="input_top_kat"> </div>
+                             </div>
+                             <div class="row pb-3">
+                                    <div class="col-lg-3 text-end"> <label class="form-label h6">Kategorie: </label> </div>
+                                    <div class="col-lg-4"><input class="form-control border border-secondary" type="text" placeholder="" name="kategorie_bezeichnung" onblur="this.value=removeSpaces(this.value);" required> </div>
+                                    <div class="col-lg-5"> </div>
+                             </div>
+                             <div class="row pb-3">
+                                    <div class="col-lg-3 text-end"><label class="form-label h6">Zubehör Von:</label> </div>
+                                    <div class="col-lg-4" id="accessory_selection">
+                                    </div>
+                                    <div class="col-lg-5" id="input_zubehoer"></div>
+                             </div>
+                             <div class="row pb-3">
+                                    <div class="col-lg-3 text-end"><label class="form-label h6">Ersatzteil Von: </label> </div>
+                                    <div class="col-lg-4" id="spare_part_selection">
+                                    </div>
+                                    <div class="col-lg-5" id="input_ersatzteil"> </div>
+                             </div>
+                            {% if both_selected_error is defined %} <p id="both_selected_error" class="input_error_message"> {{both_selected_error}} {% endif %}</p>
+                             <div class="row pb-3">
+                                    <div class="col-lg-3"> </div>
+                                    <div class="col-lg-4"> <button type="submit" class="btn btn-primary">Hinzufügen</button> </div>
+                                    <div class="col-lg-5"></div>
+                             </div>
+    </div>
+
+</form>
+
+</div>
+
+
+<div class="container bg-white border border-secondary p-3">
+    <p class="h3 text-center pt-3  mb-3"> Kategorien </p>
+
+        <!--- category selection -->
+        <div class="row ms-3 mb-5 d-flex align-items-baseline">
+
+            <div class="col-auto col-lg-4  d-flex w-25 " id="div1">
+                <select class="form-select border border-secondary" aria-label="Default select example" id="kategorie">
+                    <option value="alle">alle</option>
+                	<option value="anderes">Geräte</option>
+                	<option value="ersatzteile"> Ersatzteile </option>
+                	<option value="zubehoer"> Zubehör </option>
+                </select>
+            </div>
+
+            <div class="col-lg-2" id="submit_all">
+                <form method="get">
+                    <input type="hidden" name="lvl1" value="alle">
+                    <button class="btn ms-3 btn-white text-dark " type="submit"><i  class="size-32" data-feather="arrow-right-circle"></i></button>
+                </form>
+            </div>
+
+            <!-- ersatzteile ----------------------------------------------------------------------------------------------------->
+
+                   <div class="col-lg-8" id="sel_input_ersatzteil" style="display:none;">
+
+                        <form method="get">
+
+                        <input type="hidden" name="lvl1" value="ersatzteile">
+                        <div class="container-fluid">
+                            <div class="row">
+                        	<div class="col-lg-4" id="et_selection"> </div>
+                            <div class="col-lg-4" id="et_top_kat_selection"> </div>
+
+                            <div class="col-lg-4">
+                                <button class="btn ms-3 btn-white text-dark float-start" type="submit"><i  class="size-32" data-feather="arrow-right-circle"></i></button>
+                            </div>
+                            </div>
+                        </div>
+                        </form>
+
+                   </div>
+
+
+
+                   <!-- zubehoer ----------------------------------------------------------------------------------------------------->
+                   <div class="col" id="sel_input_zubehoer" style="display:none;">
+
+                        <form method="get">
+                        	<input type="hidden" name="lvl1" value="zubehoer">
+                            <div class="container-fluid">
+                            <div class="row">
+                        		<div class="col-lg-4" id="zb_selection"> </div>
+                                <div class="col-lg-4" id="zb_top_kat_selection"> </div>
+
+                                <div class="col-lg-4">
+                                    <button class="btn ms-3 btn-white text-dark float-start" type="submit"><i  class="size-32" data-feather="arrow-right-circle"></i></button>
+                                </div>
+                            </div>
+                            </div>
+                        </form>
+                   </div>
+
+                   <!-- anderes -------------------------------------------------------------------------------------------------------->
+
+                   <div class="col" id="input_anderes" style="display:none;" >
+
+                        <form method="get">
+                        <input type="hidden" name="lvl1" value="anderes">
+                            <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-lg-4" id="a_top_kat_selection"> </div>
+
+                                <div class="col-lg-4">
+                                    <button class="btn ms-3 btn-white text-dark float-start" type="submit"><i  class="size-32" data-feather="arrow-right-circle"></i></button>
+                                </div>
+                            </div>
+                            </div>
+                        </form>
+                   </div>
+
+            </div> <!-- eo row -->
+        <!-- eo category selection -->
+
+        <div class="row me-2 ms-2 mb-2">
+            {% for i in t_header_1 %}
+            <div class="{% if loop.index0 == 0 %} col-lg-1 {%else %} col {%endif%} h5" >{{i}} </div>
+            {% endfor %}
+            <div class="col-lg-2"></div>
+        </div>
+
+        {% if t_content_1 is defined %}
+        {% for row in t_content_1 %}
+            <div class="row mb-3 pb-3 me-2 ms-2 border-bottom border-secondary">
+
+            {% for cell in row %}
+                {% if loop.index0 != 0 and loop.index != loop.length %}
+                <div class=" {% if loop.index0 == 1 %} col-lg-1 {%else %} col {%endif%} border-end border-secondary">{{ cell }}</div>
+                {%endif%}
+            {% endfor %}
+
+                <div class="col-lg-2 d-flex align-items-baseline">
+
+                    <form action="{{ url_for('category_bp.category_edit', idd=row[1]) }}">
+                        <button class="btn btn-primary me-3" type="submit" value="edit">
+                            <i class="feather-16" data-feather="edit"></i>
+                        </button>
+                    </form>
+
+                    <!-- legal description btn-->
+                    {% if row[6] %}
+                        <button class="btn btn-success me-3" data-bs-toggle="modal" data-bs-target="#legal_descr{{row[1]}}">
+                            <i class="feather-16" data-feather="book"></i>
+                        </button>
+                    {% else %}
+                        <button class="btn btn-outline-secondary me-3" data-bs-toggle="modal" data-bs-target="#legal_descr{{row[1]}}">
+                            <i class="feather-16" data-feather="book-open"></i>
+                        </button>
+                    {% endif %}
+
+                    <!-- delete btn-->
+                    {% if row[0] == 'no' %}
+                        <button class="btn btn-danger float-end " data-bs-toggle="modal" data-bs-target="#delete_category{{row[1]}}">
+                            <i class="feather-16" data-feather="trash-2"></i>
+                        </button>
+                    {%endif%}
+                </div>
+            </div>
+
+                <!-- Modal delete category -->
+                <div class="modal fade" id="delete_category{{row[1]}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" >Sicherheitsabfrage</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                          Soll die Kategorie {{row[1]}} wirklich gelöscht werden?
+                      </div>
+                      <div class="modal-footer">
+                        <form method="POST" name="del_kat_form">
+                            <button class="btn btn-danger" name="delete_button" value={{row[1]}} type="submit">Ja</button>
+                        </form>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nein</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Modal add/change legal description -->
+                <div class="modal" id="legal_descr{{row[1]}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" >Rechtstext</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+
+                          <div id="btn_edit_legal_descr{{row[1]}}">
+                               {% if row[6] %}
+                                    {{ row[6] }}
+                                {%else%}
+                                    -
+                                {%endif %}
+
+                                <button class="btn-primary ms-5" type="button" onclick="open_edit_legal_descr({{row[1]}});">
+                                    <i class="feather-16" data-feather="edit"></i>
+                                </button>
+                            </div>
+
+                            <div id="edit_legal_descr{{row[1]}}" style="display:none;">
+                                <form method="POST">
+							        <textarea class="form-control" name="new_legal_descr" >{% if row[6] %}{{row[6]}}{%endif%}</textarea>
+
+                                    <div class="row d-flex jusitfy-content-start mt-3">
+                                         <div class="col">
+                                            <button class="btn btn-success" type="submit" name="kat_id" value="{{row[1]}}"><i class="feather-16" data-feather="check-circle"></i>aktualisieren</button>
+                                         </div>
+                                         <div class="col">
+                                             <button type="button" class="btn btn-secondary" onclick="close_edit_legal_descr({{row[1]}});">abbrechen</button>
+                                         </div>
+                                    </div>
+                                </form>
+
+                            </div>
+                      </div>
+
+
+                    </div>
+                  </div>
+                </div>
+
+        {%endfor %}
+        {% endif %}
+</div>
+
+
+<script type="text/javascript">
+
+const urlParams = new URLSearchParams(window.location.search);
+
+$(document).ready(function() {
+    show_input_top_kat($('#top_kat_selection').val());
+
+    existing_accessory_entries_ajax();
+    existing_spare_part_entries_ajax();
+
+    set_form($('#kategorie').val());
+
+
+    console.log(urlParams.get("lvl1"));
+    if(urlParams.get("lvl1")===null){
+        console.log("is null");
+    }else{
+        set_selection_based_on_parameters();
+    }
+});
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+const set_selection_based_on_parameters=async() =>{
+
+        switch(urlParams.get('lvl1')){
+            case "alle":
+                break;
+            case "anderes":
+                $('#kategorie').val('anderes').change()
+                a_top_kat();
+                await delay(100);
+                if(urlParams.get('lvl2')!='alle'){
+                    $("#anderes_top_kat").val(urlParams.get('lvl2')).change();
+                }
+
+            break;
+            case "zubehoer":
+                $('#kategorie').val('zubehoer').change()
+                start_zb_ajax();
+                await delay(100);
+                if(urlParams.get('lvl2')!='alle'){
+                    $("#zubehoer_zb").val(urlParams.get('lvl2')).change();
+                }
+                await delay(100);
+                if(urlParams.get('lvl3')!="alle"){
+                    $("#zubehoer_top_kat").val(urlParams.get('lvl3')).change();
+                }
+            break;
+            case "ersatzteile":
+                    $('#kategorie').val('ersatzteile').change()
+                    start_et_ajax();
+                    await delay(100);
+                    if(urlParams.get('lvl2')!='alle'){
+                         $("#ersatzteile_et").val(urlParams.get('lvl2')).change();
+
+                    }
+                    await delay(100);
+                    if(urlParams.get('lvl3')!='alle'){
+
+                        $("#ersatzteile_top_kat").val(urlParams.get('lvl3')).change();
+                    }
+            break;
+            default:
+                console.log("");
+                break;
+        }
+
+}
+
+
+// selection for displaying categories
+
+$('#kategorie').change(function(){
+    hide_all();
+	set_form($('#kategorie').val());
+});// eo on change
+
+function hide_all(){
+    $('#input_anderes').hide();
+	$('#sel_input_ersatzteil').hide();
+	$('#sel_input_zubehoer').hide();
+}
+
+function set_form(lang){
+	switch(lang) {
+	    case "alle":
+	        $('#submit_all').show();
+	        break;
+		case "ersatzteile":
+		    $('#submit_all').hide();
+			$('#sel_input_ersatzteil').show();
+			start_et_ajax();
+			break;
+		case "zubehoer":
+		    $('#submit_all').hide();
+			$('#sel_input_zubehoer').show();
+			start_zb_ajax();
+			break;
+		case "anderes":
+		    $('#submit_all').hide();
+			$('#input_anderes').show();
+			a_top_kat();
+			break;
+		default:
+			console.log("none");
+	}
+}
+
+
+//ersatzteile----------------------------------------------------------------------------------------------------------------------
+function start_et_ajax(){
+
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: 'ersatzteile'},
+					success: function(resp){
+						if(resp !=0){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" id="ersatzteile_et" onchange="et_top_kat(this.value)" name="lvl2">`;
+                            html_str += `<option value="alle">alle</option>`
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+						}
+						html_str+="</select>";
+
+						$('#et_selection').html(html_str);
+						et_top_kat('alle');
+		  			}
+	});
+
+}
+
+
+function et_top_kat(val){
+    if (val=='alle'){
+        $('#et_top_kat_selection').hide();
+        return;
+    }
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {et: val},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" id="ersatzteile_top_kat" name="lvl3">`;
+                            html_str += `<option value="alle">alle</option>`
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+                        $('#et_top_kat_selection').show();
+						$('#et_top_kat_selection').html(html_str);
+		  			}
+	});
+}
+
+
+
+//zubehör--------------------------------------------------------------------------------------------------------------------------
+
+function start_zb_ajax(){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: 'zubehoer'},
+					success: function(resp){
+						if(resp !=0){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="zb_top_kat(this.value)", id="zubehoer_zb" name="lvl2">`;
+                            html_str += `<option value="alle">alle</option>`
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+						}
+						html_str+="</select>";
+
+						$('#zb_selection').html(html_str);
+						zb_top_kat('alle');
+		  			}
+	});
+}
+
+function zb_top_kat(val){
+
+    if (val=='alle'){
+        $('#zb_top_kat_selection').hide();
+        return;
+    }
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {zb: val},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" id="zubehoer_top_kat" name="lvl3">`;
+                            html_str += `<option value="alle">alle</option>`
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+                        $('#zb_top_kat_selection').show();
+						$('#zb_top_kat_selection').html(html_str);
+		  			}
+	});
+}
+
+//sonstiges-------------------------------------------------------------------------------------------------------------
+
+// leben macht keinen sinn mehr, einfach schlafen gehen
+//https://stackoverflow.com/questions/62340900/change-event-inside-ajax-success-function
+
+function a_top_kat(){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: 'anderes'},
+					success: function(resp){
+
+							if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" id="anderes_top_kat" name="lvl2">`;
+                            html_str += `<option value="alle">alle</option>`
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#a_top_kat_selection').html(html_str);
+		  			}
+	});
+}
+
+//eo selection for displaying categories
+
+
+$('#top_kat_selection').change(function(){
+	show_input_top_kat($('#top_kat_selection').val());
+});
+
+
+function show_input_top_kat(top_kat){
+
+if(top_kat=='neu') {
+        $('#input_top_kat').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="kategorie_input" onblur="this.value=removeSpaces(this.value);" required>`);
+}else{
+    $('#input_top_kat').html('');
+}
+}
+
+//Accessorys:-------------------------------------
+function existing_accessory_entries_ajax(){
+
+	$.ajax({
+					url: "{{ url_for( 'category_bp.ajax_get_accessory_entries' ) }}",
+					type: "GET",
+					data: {ac: '1'},
+					success: function(resp){
+
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener 'zubehör' Einträge vom Server (ajax_get_accessory_entries)");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="show_input_zubehoer(this.value)" name="zubehoer_selection" id="zubehoer_selection">`;
+
+							var iterator = resp.values();
+                            html_str += `<option value='' selected> - </option>`
+                            html_str += `<option value='neu'> Neu </option>`
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#accessory_selection').html(html_str);
+						show_input_zubehoer('');
+		  			}
+	});
+}
+
+function show_input_zubehoer(zubehoer){
+
+    if(zubehoer==''){
+         $('#ersatzteil_selection').prop('disabled', false);
+    }else{
+         $('#ersatzteil_selection').prop('disabled', true);
+    }
+
+    if(zubehoer=='neu') {
+            $('#input_zubehoer').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="zubehoer_input" onblur="this.value=removeSpaces(this.value);" required>`);
+    }else{
+        $('#input_zubehoer').html('');
+    }
+}
+
+//Spare Parts:-------------------------------------
+Accessorys:
+function existing_spare_part_entries_ajax(){
+
+	$.ajax({
+					url: "{{ url_for( 'category_bp.ajax_get_spare_part_entries' ) }}",
+					type: "GET",
+					data: {sp: '1'},
+					success: function(resp){
+
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener 'ersatzteil' Einträge vom Server (ajax_get_spare_part_entries)");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="show_input_ersatzteil(this.value)" name="ersatzteil_selection" id="ersatzteil_selection">`;
+
+							var iterator = resp.values();
+                            html_str += `<option value='' selected> - </option>`
+                            html_str += `<option value='neu'> Neu </option>`
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#spare_part_selection').html(html_str);
+						show_input_ersatzteil('');
+		  			}
+	});
+}
+
+
+function show_input_ersatzteil(ersatzteil){
+
+    if(ersatzteil==''){
+         $('#zubehoer_selection').prop('disabled', false);
+    }else{
+         $('#zubehoer_selection').prop('disabled', true);
+    }
+    if(ersatzteil=='neu') {
+            $('#input_ersatzteil').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="ersatzteil_input" onblur="this.value=removeSpaces(this.value);" required>`);
+    }else{
+        $('#input_ersatzteil').html('');
+    }
+}
+
+//edit legal description:
+function open_edit_legal_descr(value){
+    $(`#edit_legal_descr${value}`).show();  //template literals
+    $(`#btn_edit_legal_descr${value}`).hide();
+}
+
+function close_edit_legal_descr(value){
+    $(`#btn_edit_legal_descr${value}`).show();
+    $(`#edit_legal_descr${value}`).hide();  //template literals
+}
+
+function removeSpaces(string) {
+ return string.split(' ').join('_');
+}
+
+
+
+</script>
+
+{%endblock%}

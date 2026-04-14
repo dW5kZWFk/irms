@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+
+<div class="container bg-white border border-secondary m-3">
+    <p class="h3 text-center p-3"> Lager-Eintrag hinzufügen </p>
+
+<form method="POST">
+<div class="container-fluid">
+
+                        	<div class="row pb-3">
+                        	  <div class="col-lg-3 text-end"> <label class="form-label h6">Schrank-ID:</label> </div>
+                        	  <div class="col-lg-4" id="shelf_number_selection"> </div>
+                        	  <div class="col-lg-5" id="shelf_number_input"></div>
+                        	</div>
+							<div class="row pb-3">
+                              <div class="col-lg-3 text-end"> <label class="form-label h6">Fach-ID:</label> </div>
+							  <div class="col-lg-4" id="compart_number_selection">  </div>
+                              <div class="col-lg-5" id="compart_number_input"> </div>
+							</div>
+                             <div class="row pb-3">
+                               <div class="col-lg-3 text-end"><p class="form-label h6">Kisten-ID: </p> </div>
+                               <div class="col-lg-4">
+                                   <input class="form-control border border-secondary" type="text" placeholder="" name="warehouse_box_number" onblur="this.value=removeSpaces(this.value);" required>
+                               </div>
+                               <div class="col-lg-5"> </div>
+                             </div>
+                             <div class="row pb-3">
+                               <div class="col-lg-3 text-end"> <label class="form-label h6">Beschreibung:</label> </div>
+                               <div class="col-lg-4"> <textarea class="form-control border border-secondary" name="warehouse_description" placeholder="Adresse" rows="3"> </textarea></div>
+                               <div class="col-lg-5"></div>
+                             </div>
+                             <div class="row pb-3">
+                                <div class="col-lg-3"> </div>
+                                <div class="col-lg-4"> <button type="submit" class="btn btn-primary">Hinzufügen</button> </div>
+                                <div class="col-lg-5"></div>
+                             </div>
+    </div>
+
+</form>
+
+</div>
+
+<div class="container bg-white border border-secondary m-3">
+    <p class="h3 text-center mb-3 p-3"> Lager-Einträge </p>
+
+        <div class="row me-2 ms-2 mb-2">
+            {% for i in warehouse_header %}
+            <div class=" h5 {% if loop.index0 == 0 %} col-lg-1 {%else %} col {%endif%}" >{{i}} </div>
+            {% endfor %}
+            <div class="col-lg-1"></div>
+        </div>
+        {% if warehouse_content is defined %}
+        {% for row in warehouse_content %}
+            <div class="row mb-3 me-2 ms-2 pb-3 border-bottom border-secondary">
+
+            {% for cell in row %}
+                 {%if loop.index0 != 0%}
+                <div class="{% if loop.index0 == 1 %} col-lg-1 {%else %} col {%endif%} border-end border-secondary">{{ cell }}</div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="col-lg-1 d-flex align-items-baseline justify-content-between">
+
+                    <form action="{{ url_for('warehouse_bp.warehouse_edit', w_id=row[1]) }}">
+                        <button class="btn btn-primary me-1" type="submit" value="edit">
+                            <i class="feather-16" data-feather="edit"></i>
+                        </button>
+                    </form>
+
+                    <form method="POST">
+                    {% if row[0] == "no" %}
+                        <button class="btn btn-danger me-1" type="button" data-bs-toggle="modal" data-bs-target="#delete_wh{{row[1]}}">
+                            <i class="feather-16" data-feather="trash-2"></i>
+                        </button>
+                    {% endif %}
+                    </form>
+
+
+                </div>
+
+            </div>
+
+            <!-- Modal delete warehouse entry -->
+                <div class="modal fade" id="delete_wh{{row[1]}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" >Sicherheitsabfrage</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Soll der Lager-Eintrag (ID: {{row[1]}}) wirklich gelöscht werden?
+                      </div>
+                      <div class="modal-footer">
+                        <form method="POST">
+                            <button class="btn btn-danger" name="delete_button" value={{row[1]}} type="submit">
+                                <i class="feather-16" data-feather="trash-2"></i>
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nein</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+        {%endfor%}
+        {%endif%}
+</div>
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	start_warehouse_ajax();
+});
+
+function start_warehouse_ajax(){
+
+$.ajax({
+					url: "{{ url_for( 'warehouse_bp.warehouse_ajax_response' ) }}",
+					type: "GET",
+					data: {go: '1'},
+					success: function(resp){
+                            if(resp=='error'){
+					                $('#ajax_flash_danger').show();
+					                $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener Schrank-IDs vom Server (warehouse_ajax_response)");
+                                    return;
+					        }
+
+							var html_str= `<select class="form-select border border-secondary" onchange="warehouse_compart_number_ajax(this.value)" id="warehouse_shelf_number" name="warehouse_shelf_number">`;
+							html_str += "<option value=\"neu\" selected> Neu </option>";
+                            html_str += `"<option value=""> - </option>"`;
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#shelf_number_selection').html(html_str);
+						$('#shelf_number_input').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="warehouse_shelf_number_new" onblur="this.value=removeSpaces(this.value);">`);
+						warehouse_compart_number_ajax('neu');
+		  			}
+	});
+
+}
+
+//val -> selected value aus s_marke
+function warehouse_compart_number_ajax(val){
+	switch(val){
+		case 'neu':
+		    $('#shelf_number_input').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="warehouse_shelf_number_new" onblur="this.value=removeSpaces(this.value);">`);
+		    $("#warehouse_compart_number").val('neu');
+	        warehouse_compart_number_neu('neu');
+	        break;
+	    case '':
+	        $('#shelf_number_input').html("");
+	         $('#compart_number_input').html("");
+	         $('#compart_number_selection').html(`<select class="form-select border border-secondary" onchange="warehouse_compart_number_neu(this.value)" id="warehouse_compart_number" name="warehouse_compart_number">
+	                                            <option value=""> - </option> </select>`);
+	        console.log("nothing");
+	        break;
+	    default:
+		    $('#shelf_number_input').html("");
+
+		    $.ajax({
+		    			url: "{{ url_for( 'warehouse_bp.warehouse_ajax_response' ) }}",
+		    			type: "GET",
+		    			data: {shelf_number: val},
+		    			success: function(resp){
+
+                                if(resp=='error'){
+					                $('#ajax_flash_danger').show();
+					                $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener Fach-IDs vom Server (warehouse_ajax_response)");
+                                    return;
+					            }
+
+		    					var html_str= `<select class="form-select border border-secondary" onchange="warehouse_compart_number_neu(this.value)" id="warehouse_compart_number" name="warehouse_compart_number">`;
+		    					html_str += "<option value=\"neu\" selected> Neu </option>";
+                                html_str += `"<option value=""> - </option>"`;
+
+		    					var iterator = resp.values();
+
+		    					for(let elements of iterator){
+		    						html_str += "<option value=\"";
+		    						html_str += elements;
+		    						html_str += "\">";
+		    						html_str += elements;
+		    						html_str += "</option>";
+		    					}
+
+		    				html_str+="</select>";
+
+		    				$('#compart_number_selection').html(html_str);
+		    				warehouse_compart_number_neu('neu');
+   							$('#compart_number_input').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="warehouse_compart_number_new" onblur="this.value=removeSpaces(this.value);"
+   							                                  >`);
+
+		      			}
+		    });
+		    break;
+	} //eo switch
+}
+
+function warehouse_compart_number_neu(val){
+
+    if(val=='neu'){
+    	$('#compart_number_input').html(`<input class="form-control border border-secondary" type="text" placeholder="" name="warehouse_compart_number_new" onblur="this.value=removeSpaces(this.value);">`);
+    }else{
+    	$('#compart_number_input').html("");
+    }
+}
+
+
+function removeSpaces(string) {
+ return string.split(' ').join('_');
+}
+
+</script>
+{%endblock%}

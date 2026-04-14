@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container-fluid bg-white w-50 m-5 p-5">
+    <div class="row mb-5">
+        <div class="col-lg-2 h4">
+            Kunde:
+        </div>
+
+        <div class="col-lg-3">
+            {% for c in customer %}
+                {{c}},
+            {% endfor %}
+
+        </div>
+
+        <div class="col-lg-8">
+
+        </div>
+
+    </div>
+
+
+
+    <div class="row mb-5">
+        <div class="col-lg-2 h4">
+            Gerät:
+        </div>
+
+        <div class="col-lg-3">
+            {% for i in item %}
+                {% if i is not none %}  {{i}}, {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="col-lg-8"></div>
+    </div>
+
+    <div class="row mb-3 pb-3 border-bottom border-secondary">
+        <div class="col-lg-2 h4">
+            Service:
+        </div>
+        <div class="col-lg-5">
+            {% if session['order_created'] %}
+                -
+            {%else%}
+            <button class="btn btn-primary" onclick="open_display_services();"> > Service auswählen </button>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-5"></div>
+
+    </div>
+
+
+    {% if session['order_created'] %}
+
+    <div class="row">
+        <div class="col-lg-1"> </div>
+        <div class="col-lg-4"><p>Auftrag (ID: {{session['order_created']}}) erstellt</p></div>
+        <div class="col-lg-3">
+            <form method="POST">
+            <button class="btn btn-primary" name="ok">
+                OK
+            </button>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="row">
+        <div class="col-lg-2"> </div>
+
+        <div class="col-lg-4">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#create_order">
+                <i class="feather-16" data-feather="check-circle"></i>
+                Auftrag Erstellen
+            </button>
+
+        </div>
+
+        <div class="col-lg-2"> </div>
+        <div class="col-lg-4">
+            <form method="POST">
+            <button class="btn btn-danger" name="abort">
+                 <i class="feather-16" data-feather="x-circle"></i>
+                Abbrechen (Gerät löschen)
+            </button>
+            </form>
+        </div>
+
+
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Modal create_order repair_order description -->
+     <div class="modal fade" id="create_order" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+       <div class="modal-dialog">
+         <div class="modal-content">
+           <div class="modal-header">
+             <h5 class="modal-title d-flex align-self-center" > Auftrag Beschreibung</h5>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+           </div>
+           <form method="POST">
+           <div class="modal-body">
+
+               <div class="container-fluid">
+                   <textarea class="form-control border border-secondary" name="description" rows="6"></textarea>
+               </div>
+
+           </div>
+           <div class="modal-footer d-flex justify-content-center">
+                 <button type="submit" name="create_order" class="btn btn-success">Erstellen</button>
+           </div>
+           </form>
+         </div>
+       </div>
+     </div>
+
+<!-- services overlay -->
+<div id="display_services" class="overlay">
+    <div class="overlay-content">
+       <button class="btn btn-danger" onclick="close_display_services();"> <i class="feather-24" data-feather="x"></i></button>
+        <div class="container-fluid">
+
+            <div class="row mb-3">
+                <div class="col-lg-4 ms-4">
+                    <div class="input-group rounded w-50 mt-2">
+                            <input type="search" class="form-control rounded" id="search_value" oninput="ajax_search(this.value);" onkeydown="ajax_search(this.value);" placeholder="Suche.." aria-label="Search" aria-describedby="search-addon" />
+                            <span class="input-group-text border-0 bg-primary text-white" id="search-addon">
+                              <i  class="feather-16" data-feather="search"></i>
+                            </span>
+                    </div>
+
+                </div>
+                <div class="col-lg-3"> </div>
+                <div class="col-lg-5">
+                 </div>
+            </div>
+
+        </div>
+
+
+        <div id="all_services" class="container-fluid">
+        {% for service in all_services %}
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <form method="POST"> <input type="hidden" name="service_id" value="{{service.ID}}">
+                    <button class="contactbtn">
+                        <div>
+                            <input type="hidden" value="{{service.ID}}">
+                            <p><b>{{service.name}}</b> 	&nbsp;- {{service.price}}</p>
+                            <p> {{service.description}} </p>
+                        </div>
+                    </button>
+                    </form>
+                </div>
+                <div class="col-lg-6"></div>
+            </div>
+        {%endfor%}
+
+        </div> <!-- eo container -->
+
+        <div id="ajax_resp_values" class="container-fluid">
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+$(document).ready(function(){
+
+});
+
+function open_display_services(){
+    $("#display_services").css("width","100%");
+}
+
+function close_display_services() {
+    $("#display_services").css("width","0%");
+}
+
+
+function ajax_search(search_value){
+
+    if(search_value){
+        $('#all_services').hide();
+
+        //console.log(search_value);
+
+        $.ajax({
+        		url: "{{ url_for( 'service_bp.ajax_service_search' ) }}",
+        		type: "GET",
+        		data: {'search_value_name': search_value},
+        		success: function(resp){
+
+                    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen der Service Details vom Server (ajax_service_search)");
+                                return;
+					}
+
+                    if(resp=="empty"){
+                        $('#ajax_resp_values').html("<p> Kein Service-Eintrag gefunden </p>");
+                    }else{
+
+                            html_str="";
+
+        			    for(const element of resp){
+        			        html_str+=`<div class="row"> <div class="col-lg-6">`;
+        			        html_str+=`<form method="POST"> <input type="hidden" name="service_id" value=`;
+                            html_str+=element["ID"]+">";
+                            html_str+="<button type=\"submit\" class=\"contactbtn\">";
+                            html_str+="<p><b>"+element["name"] +"</b> &nbsp;-" +element["price"] + "</p>";
+                            html_str+="<p>"+element["description"] +"</p>";
+                            html_str+="</button> </form></div> <div class=\"col-lg-6\"></div> </div>";
+        		        }// eo for
+                            console.log(html_str);
+        		        $('#ajax_resp_values').html(html_str);
+
+        		    }//eo else
+
+        		}
+        	});
+
+        $('#ajax_resp_values').show();
+
+    }else{
+         $('#all_services').show();
+         $('#ajax_resp_values').hide();
+    }
+
+}
+
+</script>
+
+{%endblock%}

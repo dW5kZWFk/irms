@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<fieldset class="add_customer m-3">
+    <legend>Kunden-Eintrag bearbeiten </legend>
+     <div class="container-fluid">
+        <form method="POST">
+                <div class="row">
+                    <div class="col-lg-3">
+                       Name:
+                    </div>
+                    <div class="col-lg-9">
+                        <input name="edit_customer_name" value="{{customer['Name']}}" placeholder="" type="text" required>
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3">
+                       E-Mail:
+                    </div>
+                    <div class="col-lg-9">
+                        <input name="edit_customer_email" value="{{customer['Email']}}" placeholder="">
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3">
+                       Telefon:
+                    </div>
+                    <div class="col-lg-9">
+                       <input name="edit_customer_phone_number" value="{{customer['Telefon']}}" placeholder="">
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3">
+                       Adresse:
+                    </div>
+                    <div class="col-lg-9">
+                        <textarea name="edit_customer_address" placeholder="" rows="3" >{{customer['Adresse']}}</textarea>
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3"> </div>
+                    <div class="col-lg-9"> <button type="submit" class="btn btn-primary">Ändern</button></div>
+                </div>
+<br>
+            </form>
+     </div>
+
+</fieldset>
+
+{% endblock %}

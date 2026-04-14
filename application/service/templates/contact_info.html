@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container bg-white border border-secondary m-3" id="contact_info">
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Adresse </label> </div>
+										<div class="col-lg-4 padding_grid_col">
+											{% set list1 = contact_info["address"].split('\n') %}
+											{% for i in list1%}
+												{{i}} <br>
+											{%endfor%}</div>
+										<div class="col-lg-5 " > </div>
+
+                              </div>
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> E-Mail </label> </div>
+										<div class="col-lg-4 padding_grid_col"> {{contact_info["mail"]}}</div>
+										<div class="col-lg-5"> </div>
+
+                              </div>
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Telefon </label> </div>
+										<div class="col-lg-4 padding_grid_col" > {{contact_info["phone"]}}</div>
+										<div class="col-lg-5 " > </div>
+
+                              </div>
+							  <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Haftungsausschluss </label> </div>
+										<div class="col-lg-4 padding_grid_col" > {% set list1 = contact_info["legal_general"].split('\n') %}
+											{% for i in list1%}
+												{{i}} <br>
+											{%endfor%}</div>
+										<div class="col-lg-5 " > </div>
+
+                              </div>
+							  <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6">  </label> </div>
+										<div class="col-lg-4 padding_grid_col"> <button class="btn btn-white" type="button" onclick="open_edit();" >  <i class="size-32" data-feather="edit"></i></button> </div>
+										<div class="col-lg-5 " > </div>
+
+                              </div>
+</div>
+
+<div class="container bg-white border border-secondary m-3" id="edit_contact_info" style="display:none;">
+           <form method="POST">
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Adresse </label> </div>
+										<div class="col-lg-6 padding_grid_col"> <textarea class="form-control" name="address" rows="5">{% if value is not none %}{{contact_info["address"]}}{%else%}{%endif %}</textarea> </div>
+										<div class="col-lg-3 " > </div>
+
+                              </div>
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> E-Mail </label> </div>
+										<div class="col-lg-6 padding_grid_col">  <input class="form-control" name="mail" value="{{contact_info['mail']}}"  type="text" placeholder="" ></div>
+										<div class="col-lg-3"> </div>
+
+                              </div>
+                              <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Telefon </label> </div>
+										<div class="col-lg-6 padding_grid_col" > <input class="form-control" name="phone" value="{{contact_info['phone']}}" type="text" placeholder=""></div>
+										<div class="col-lg-3 " > </div>
+
+                              </div>
+							  <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6"> Haftungsausschluss </label> </div>
+										<div class="col-lg-6 padding_grid_col" > <textarea class="form-control" name="legal_general" rows="5">{% if value is not none %}{{contact_info["legal_general"]}}{%else%}{%endif %}</textarea> </div>
+										<div class="col-lg-3 " > </div>
+
+                              </div>
+							  <div class="row pb-3">
+
+										<div class="col-lg-3 text-end"> <label class="form-label h6">  </label> </div>
+										<div class="col-lg-6 padding_grid_col"> <button class="btn btn-success" type="submit"><i class="feather-16" data-feather="check-circle"></i>aktualisieren</button> </div>
+										<div class="col-lg-3 " > </div>
+
+                              </div>
+		   </form>
+</div>
+<script type="text/javascript">
+
+function open_edit(){
+    $('#edit_contact_info').show();
+    $('#contact_info').hide();
+}
+
+</script>
+{%endblock%}

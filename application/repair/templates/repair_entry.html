@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+<fieldset class="m-3 bg-white w-50 p-3">
+    <legend>Reparatur Eintrag</legend>
+        <div class="container-fluid">
+            <form method="POST">
+
+            <div class="row">
+                <div class="col-lg-4 h5"> Fehlerbeschreibung: </div>
+                <div class="col-lg-8"> <textarea class="form-control border border-dark" onfocus="remove_error();" rows="5" name="repair_description"></textarea></div>
+            </div>
+<br>
+            <div class="row">
+                <div class="col-lg-4"> </div>
+                <div class="col-lg-8"> <button type="submit" class="btn btn-primary">Hinzufügen</button></div>
+            </div>
+
+            </form>
+        </div>
+    </fieldset>
+
+{%if error is defined %} <p class="input_error_message" id="error">{{error}} </p> {%endif%}
+{%endblock%}
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+});
+
+function remove_error(){
+    $('#error').hide();
+}
+
+</script>

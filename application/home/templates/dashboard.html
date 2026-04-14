@@ -1,0 +1,482 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+<!-- test update no 2-->
+{% if display_error is not defined %}
+
+
+<div style="display:none;">
+    {% if motivation_done %}
+    <span id="motivation_done">{{motivation_done}}</span> €
+    {%else%}
+        -
+    {%endif %}
+
+    {% if motivation_goal %}
+    <span id="motivation_goal">{{motivation_goal}}</span> €
+    {%else%}
+        -
+    {%endif %}
+</div>
+
+<fieldset class="w-100 bg-white border border-muted mt-3">
+                   <div id="motivation_price" class="mb-3 ms-3">
+                          <canvas id="chartJSContainer" width="400" height="50"></canvas>
+                       <b>Verbleibend bis zum Ziel:</b> {{motivation_todo}}
+                        <button class="btn btn-primary ms-5" type="button" onclick="open_edit_motivation();">
+                                <i class="feather-16" data-feather="edit"></i>
+                        </button>
+
+                    </div>
+
+
+
+                    <div id="edit_motivation" style="display:none;">
+                        <form method="POST">
+
+                        <div class="row mt-3">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2"><b>Erreicht:</b></div>
+                            <div class="col-md-3">
+                                <input class="form-control" name="new_motivation_done" {% if motivation_done %} value="{{motivation_done}}" {%endif%} type="text" pattern="[0-9]{1,8},[0-9]{2}" placeholder="0,00">
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-2"><b>Ziel:</b></div>
+                            <div class="col-md-3">
+                                <input class="form-control" name="new_motivation_goal" {% if motivation_goal %} value="{{motivation_goal}}" {%endif%} type="text" pattern="[0-9]{1,8},[0-9]{2}" placeholder="0,00">
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div>
+
+
+                            <div class="row mb-3 mt-2" >
+                                <div class="col-md-2"></div>
+                                <div class="col-md-2"></div>
+                                <div class="col-md-3">
+                                <button class="btn btn-success float-end" type="submit">
+                                    <i class="feather-16" data-feather="check-circle"></i>
+                                </button> </div>
+                                <div class="col-md-4"></div>
+                            </div>
+
+                        </form>
+
+                    </div>
+</fieldset>
+<br> <br>
+
+<fieldset class="w-100 bg-white border border-muted mt-2">
+<div class="d-flex justify-content-center mt-1">
+
+    <div class="container-fluid">
+
+
+        <div class="d-flex row mt-3 mb-3 align-items-baseline">
+
+
+                    <div class="col-lg-3 ">
+
+
+                <div class="card bg-light border border-dark w-75">
+                  <!-- <img src="..." class="card-img-top" alt="..."> -->
+                  <div class="card-body">
+                    <h5 class="card-title h5"><a class="link-secondary text-decoration-none" href="{{url_for('inventory_bp.products')}}"> Inventar-Einträge </a></h5>
+                      <p class=" card-text h6">funktioniert: {{ inv_fkt[0] }} </p>
+                      <p class="card-text h6">reparierbar:  {{ inv_fkt[1] }} </p>
+                       <p class="card-text h6">ungeprüft: {{ inv_fkt[2] }}</p>
+                      <!--<div class="row mb-3 mt-3 border-bottom border-dark"></div>
+                      <p class="card-text h6">Gesamt {{inv_total}}</p>-->
+                  </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 ">
+
+                  <div class="card bg-light border border-dark w-75">
+                  <!--<img src="{{url_for('static',filename='repair_icon.png')}}" width="133" height="100" class="card-img-top" alt="...">  x1,33 -->
+                  <div class="card-body">
+                    <h5 class="card-title h5"> <a class="link-secondary text-decoration-none" href="{{url_for('repair_bp.repairs_internal')}}"> Interne Reparaturen </a></h5>
+                      <p class="card-text h6"> offen: {{ rep_open }} </p>
+                    <p class="card-text h6"> abgeschlossen: {{ rep_closed }}</p>
+                  </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 ">
+
+                <div class="card bg-light border border-dark w-75">
+                  <!--<img src="{{url_for('static',filename='order_icon.png')}}" class="card-img-top" alt="..."> -->
+                  <div class="card-body">
+                    <h5 class="card-title h5"><a class="link-secondary text-decoration-none" href="{{url_for('repair_bp.repair_orders')}}"> Aufträge </a></h5>
+                      <p class="card-text h6"> offen: {{ best_anz[0] }} </p>
+                    <p class="card-text h6"> abgeschlossen: {{ best_anz[1] }}</p>
+                  </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 ">
+
+                <div class="card bg-light border border-dark w-75">
+                  <!--<img src="{{url_for('static',filename='order_icon.png')}}" class="card-img-top" alt="..."> -->
+                  <div class="card-body">
+                    <h5 class="card-title h4"></h5>
+                      <p class="card-text h6"> Kategorien: {{ cat_amount }} </p>
+                      <p class="card-text h6"> Services: {{ service_amount }} </p>
+                    <p class="card-text h6"> Benutzer: {{ user_amount }}</p>
+                  </div>
+                </div>
+
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+</div>
+</fieldset>
+<br> <br>
+
+<fieldset class="w-100 bg-white border border-muted">
+    <legend> Inventar Übersicht &nbsp;
+        <button class="btn btn-white" onclick="hide_show_section();" id="inv_uebersicht_btn">
+                <i id="inv_uebersicht_icon"  class="feather-16" data-feather="arrow-down"></i>
+        </button>
+    </legend>
+
+    <section id="inv_uebersicht" style="display:none">
+        <div class="conatainer-fluid">
+            <div class="d-flex flex-row mb-1 mt-3 justify-content-end align-items-baseline">
+                <button type="button" class="btn btn-light float-end" data-bs-toggle="modal" data-bs-target="#show_info_displayed_items">
+                                     <i class="feather-24" data-feather="help-circle"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 d-flex justify-content-center">
+                    <table class="content_dashboard">
+                          <caption> Geräte ({{a_amount}})</caption>
+
+                              <tr class="content_dashboard">
+                                 {% for i in sonst_header %}
+                                 <th scope="col">{{i}} </th>
+                                 {% endfor %}
+                             </tr>
+
+                             {% for row in sonst_content %}
+
+                             <tr class="content_dashboard">
+                             {% for cell in row %}
+
+                                 <td class="content_dashboard">{% if cell is none %} {% else %} {{ cell }} {% endif %}</td>
+                             {% endfor %}
+
+                             </tr>
+
+                             {% endfor %}
+
+                         </table>
+                </div>
+                <div class="col-lg-6">
+                    <canvas id="chart_a" ></canvas>
+                </div>
+        </div>
+
+        <div class="row mb-3 mt-3 border-bottom border-top border-secondary d-flex align-items-center">
+            <div class="col-lg-6 d-flex justify-content-center">
+                <table class="content_dashboard">
+                 <caption> Ersatzteile <b>({{sp_amount}})</b></caption>
+
+                     <tr class="content_dashboard">
+                        {% for i in et_header %}
+                        <th scope="col">{{i}} </th>
+                        {% endfor %}
+                    </tr>
+
+                    {% for row in et_content %}
+
+                    <tr class="content_dashboard">
+                    {% for cell in row %}
+
+                        <td class="content_dashboard">{% if cell is none %} {% else %} {{ cell }} {% endif %}</td>
+                    {% endfor %}
+
+                    </tr>
+
+                    {% endfor %}
+
+                </table>
+            </div>
+            <div class="col-lg-6 d-flex">
+                    <canvas id="chart_et" ></canvas>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6 d-flex justify-content-center">
+                <table class="content_dashboard">
+                     <caption> Zubehör ({{ac_amount}})</caption>
+
+                         <tr class="content_dashboard">
+                            {% for i in zb_header %}
+                            <th scope="col">{{i}} </th>
+                            {% endfor %}
+                        </tr>
+
+                        {% for row in zb_content %}
+
+                        <tr class="content_dashboard">
+                        {% for cell in row %}
+                            <td class="content_dashboard">{% if cell is none %} {% else %} {{ cell }} {% endif %}</td>
+                        {% endfor %}
+
+                        </tr>
+
+                        {% endfor %}
+
+                </table>
+            </div>
+            <div class="col-lg-6">
+                    <canvas id="chart_zb"></canvas>
+            </div>
+
+        </div>
+        </div>
+
+    </section>
+</fieldset>
+
+<div class="container-fluid bg-white border border-muted">
+  <div class="row">
+      <div class="col-lg-6 d-flex align-self-center">
+            <div class="container-fluid bg-white">
+
+                <div class="row mb-3"><b >Verkauf Gesamt: </b> <span>{{sales_total}} € (x{{sales_count}}) </span> </div>
+            <br>
+                <div class="row mb-5"> <b>Einkauf Gesamt: </b> <span> {{purchase_total}} € (x{{purchase_count}}) </span> </div>
+
+                <h5>Gesamtwert Items: {{umlaufv}}</h5>
+            </div>
+     </div>
+      <div class="col-lg-6">
+          {% if labels_p_s is defined %}
+                <canvas  id="bar-chart-grouped" width="800" height="450"></canvas>
+          {%endif%}
+      </div>
+</div>
+    </div>
+
+{% endif %} <!-- eo display_error -->
+
+<!-- Modal Availiability Info -->
+<div class="modal fade" id="show_info_displayed_items" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Übersicht über alle internen Items (nicht Teil eines Auftrages). </p>
+        <p> (Dazu zählen auch Items, die derzeit als Ersatzteile in einer Reparatur verwendet werden.)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--<script src="{{url_for('static',filename='js/chart-js-3.7.1/dist/chart.min.js')}}"></script>
+-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.js"></script>
+<script type="text/javascript">
+var labels_p_s = []
+$( document ).ready(function() {
+console.log($('#motivation_done').html());
+
+});
+
+
+//edit motivation-------------------------------------------------------------------------------------------------------
+function open_edit_motivation(){
+    $('#edit_motivation').show();
+    $('#motivation_price').hide();
+}
+
+//charts----------------------------------------------------------------------------------------------------------------
+
+    {% for i in labels_p_s %}
+        str = '{{i}}'.replace('&#39;','')
+        str = str.replace('&#39;','')
+        labels_p_s.push(str);
+    {% endfor %}
+    console.log(labels_p_s)
+
+
+const ctx = $('#chart_a');
+
+const pieChart = new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: ['funktioniert', 'reparierbar', 'ungeprüft'],
+    datasets: [{
+      data: {{values_a}},
+      backgroundColor: [
+        "#3bd91b", "#0275d8 ", "#424949 "
+      ],
+      borderColor: [
+                "#3bd91b", "#0275d8 ", "#424949 "
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+   	//cutoutPercentage: 40,
+    responsive: false,
+
+  }
+});
+
+const ctx_et = $('#chart_et');
+
+
+const pieChart_et = new Chart(ctx_et, {
+  type: 'doughnut',
+  data: {
+    labels: ['funktioniert', 'reparierbar', 'ungeprüft'],
+    datasets: [{
+      data: {{values_sp}},
+      backgroundColor: [
+        "#3bd91b ", "#0275d8 ", "#424949 "
+      ],
+      borderColor: [
+                "#3bd91b", "#0275d8 ", "#424949 "
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+   	//cutoutPercentage: 40,
+    responsive: false,
+
+  }
+});
+
+const ctx_zb = $('#chart_zb');
+
+
+const pieChart_zb = new Chart(ctx_zb, {
+  type: 'doughnut',
+  data: {
+    labels: ['funktioniert', 'reparierbar', 'ungeprüft'],
+    datasets: [{
+      data: {{values_ac}},
+      backgroundColor: [
+        "#3bd91b", "#0275d8 ", "#424949 "
+      ],
+      borderColor: [
+                "#3bd91b", "#0275d8 ", "#424949 "
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+   	//cutoutPercentage: 40,
+    responsive: false,
+
+  }
+});
+
+{% if labels_p_s is defined %}
+new Chart(document.getElementById("bar-chart-grouped"), {
+    type: 'bar',
+    data: {
+      labels: labels_p_s,
+      datasets: [
+        {
+          label: "Einkauf",
+          backgroundColor: "#3e95cd",
+          data: {{purchase_values}}
+        }, {
+          label: "Verkauf",
+          backgroundColor: "#8e5ea2",
+          data: {{sale_values}}
+        }
+      ]
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Population growth (millions)'
+      }
+    }
+});
+{% endif %}
+
+//loading screen Motivation:
+
+const options = {
+  type: 'bar',
+  data: {
+        labels: [""],
+    datasets: [{
+        label: 'erreicht',
+        data: [parseFloat($('#motivation_done').html())],
+        backgroundColor: 'green',
+        barPercentage: 0.6
+      },
+      {
+        label: 'Ziel',
+        data: [parseFloat($('#motivation_goal').html())],
+        backgroundColor: 'gray',
+      }
+    ]
+  },
+  options: {
+  indexAxis: 'y',
+    scales: {
+      y: {
+        stacked: true
+      }
+    }
+  }
+}
+
+const ctx_new = document.getElementById('chartJSContainer').getContext('2d');
+new Chart(ctx_new, options);
+//----------------------------------------------------------------------------------------------------------------------
+
+
+ var hidden=new Boolean("true");;
+ $(document).ready(function() {
+    feather.replace();
+    console.log("ready!");
+});
+
+function hide_show_section(){
+     console.log("clicked");
+     if(hidden){
+        $('#inv_uebersicht').show('slow');
+        $('#inv_uebersicht_btn').html(` <i id="inv_uebersicht_icon"  class="feather-16" data-feather="arrow-up"></i>`)
+        feather.replace();
+        hidden=false;
+     }else{
+        $('#inv_uebersicht').hide('slow');
+        $('#inv_uebersicht_btn').html(` <i id="inv_uebersicht_icon"  class="feather-16" data-feather="arrow-down"></i>`)
+        feather.replace();
+        hidden=true;
+     }
+
+}
+
+
+</script>
+
+{%endblock%}

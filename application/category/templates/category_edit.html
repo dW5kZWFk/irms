@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<fieldset class="m-3 p-3 w-50 bg-white border border-dark">
+
+    <form method="POST" name="edit_kat_form">
+        <div class="container-fluid">
+
+            <div class="row mb-3">
+                <div class="col-lg-4"><p class="card-text h6 text-end">ID:</p></div>
+                <div class="col-lg-4">{{kat_id}}</div>
+                <div class="col-lg-4"></div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4"> <p class="card-text h6 text-end">Top - Kategorie: </p> </div>
+                <div class="col-auto col-lg-4">
+                    <select class="form-select border border-dark" name="top_kat_selection" id="top_kat_selection">
+                        <option value="neu">Neu</option>
+                        {% for key in kat_dict %}
+                            <option value={{key}} {% if key == sel_kat["ueber_kategorie"] %} selected {% endif %}> {{key}} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-4" id="input_top_kat"></div>
+            </div>
+<br>
+            <div class="row">
+                <div class="col-lg-4"><p class="card-text h6 text-end">Kategorie: </p></div>
+                <div class="col-lg-4">
+                    <input class="form-control" value="{{sel_kat['kategorie_bezeichnung']}}" type="text" placeholder="" name="kategorie_bezeichnung" onblur="this.value=removeSpaces(this.value);" required>
+                </div>
+            </div>
+<br>
+            <div class="row">
+                <div class="col-lg-4"> <p class="card-text h6 text-end">Zubehör Von:</p> </div>
+                <div class="col-auto col-lg-4">
+                    <select class="form-select border border-dark" name="zubehoer_selection" id="zubehoer_selection">
+                        <option value=""> - </option>
+                        <option value="neu"> Neu </option>
+                            {% for ac in accessories %}
+                                <option value={{ac}} {% if ac == sel_kat["zubehoer_von"] %} selected {% endif %}>{{ac}}</option>
+                            {% endfor %}
+
+                    </select>
+                </div>
+                 <div class="col-lg-4" id="input_zubehoer"></div>
+            </div>
+<br>
+            <div class="row">
+                <div class="col-lg-4"> <p class="card-text h6 text-end">Ersatzteil Von: </p> </div>
+                <div class="col-auto col-lg-4">
+                    <select class="form-select border border-dark" name="ersatzteil_selection" id="ersatzteil_selection">
+                        <option value=""> - </option>
+                        <option value="neu"> Neu </option>
+                            {% for sp in spare_parts %}
+                                <option value={{sp}} {% if sp == sel_kat["ersatzteil_von"] %} selected {% endif %}>{{sp}}</option>
+                            {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-4" id="input_ersatzteil"></div>
+            </div>
+            {% if both_selected_error is defined %} <p id="both_selected_error" class="input_error_message"> {{both_selected_error}} {% endif %}</p>
+<br>
+
+            <div class="row">
+                <div class="col-lg-4"> </div>
+                <div class="col-lg-4"><button type="submit" class="btn btn-primary">Ändern</button></div>
+                <div class="col-lg-4"> </div>
+            </div>
+    <br>
+    </div>
+</form>
+
+</fieldset>
+
+<script type="text/javascript">
+show_input_top_kat($('#top_kat_selection').val());
+show_input_zubehoer($('#zubehoer_selection').val());
+show_input_ersatzteil($('#ersatzteil_selection').val());
+
+
+$('#top_kat_selection').change(function(){
+	show_input_top_kat($('#top_kat_selection').val());
+});
+
+$('#zubehoer_selection').change(function(){
+	show_input_zubehoer($('#zubehoer_selection').val());
+});
+
+$('#ersatzteil_selection').change(function(){
+	show_input_ersatzteil($('#ersatzteil_selection').val());
+});
+
+function show_input_top_kat(top_kat){
+
+if(top_kat=='neu') {
+        $('#input_top_kat').html(`<input class="form-control" type="text" placeholder="" name="kategorie_input" onblur="this.value=removeSpaces(this.value);" required>`);
+}else{
+    $('#input_top_kat').html('');
+}
+}
+
+function show_input_zubehoer(zubehoer){
+
+    if(zubehoer==''){
+         $('#ersatzteil_selection').prop('disabled', false);
+    }else{
+         $('#ersatzteil_selection').prop('disabled', true);
+    }
+
+    if(zubehoer=='neu') {
+            $('#input_zubehoer').html(`<input class="form-control" value="{{sel_kat["zubehoer_von"]}}" type="text" placeholder="" name="zubehoer_input" onblur="this.value=removeSpaces(this.value);" required>`);
+    }else{
+        $('#input_zubehoer').html('');
+    }
+}
+
+function show_input_ersatzteil(ersatzteil){
+
+    if(ersatzteil==''){
+         $('#zubehoer_selection').prop('disabled', false);
+    }else{
+         $('#zubehoer_selection').prop('disabled', true);
+    }
+
+    if(ersatzteil=='neu') {
+            $('#input_ersatzteil').html(`<input class="form-control" value="{{sel_kat["ersatzteil_von"]}}" type="text" placeholder="" name="ersatzteil_input" onblur="this.value=removeSpaces(this.value);" required>`);
+    }else{
+        $('#input_ersatzteil').html('');
+    }
+}
+
+function removeSpaces(string) {
+ return string.split(' ').join('_');
+}
+
+</script>
+{%endblock%}

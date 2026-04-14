@@ -1,0 +1,1766 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+
+<div class="container-fluid pb-3 bg-white mt-3 pt-3">
+
+    <div class="row" id="preload_image" >
+        <div class="col-lg-10 col-md-10"></div>
+        <div class="col-lg-2 col-md-2">
+                <!-- <form action="{{ url_for('inventory_bp.products_warehouse_view')}}"> <button type="submit" class="btn btn-primary" value="details" onclick="save_scroll_pos();save_kats();"> Lager-Ansicht -> </button> </form> -->
+                <img class="main-img" src="/static/1487.gif">
+        </div>
+    </div>
+
+ <form class="form-inline" id="main_form" method="POST">
+    <div class="row ms-3 mt-3">
+
+                <div class="col-lg-10 col-md-10">
+
+
+
+                        <p class="h5">Kategorie wählen:</p>
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-auto">
+                                        <select class="form-select border border-dark" onchange="save_kats();" name="kategorie" id="kategorie">
+                                        <!--<option value="alle" >Alle</option>-->
+                    	                <option value="ersatzteile" > Ersatzteile </option>
+                    	                <option value="zubehoer" > Zubehör </option>
+                    	                <option value="anderes" >Geräte</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-auto" style="display:none;" id="sub_kat_lvl1"> </div>
+                                    <div class="col-auto" style="display:none;" id="sub_kat_lvl2"> </div>
+                                    <div class="col-auto" style="display:none;" id="sub_kat_lvl3"> </div>
+
+                                    <div class="col-lg-2 col-md-2"><button class="btn btn-white" type="button" onclick="sort_ajax();" id="btn_sbm">  <i class="size-32" data-feather="arrow-right-circle"></i></button> </div>
+                                </div>
+                            </div>
+
+
+                </div>
+
+                <div class="col-lg-2 col-md-2"></div>
+
+    </div> <!-- eo row -->
+
+    <div class="row mt-4 mb-5 ms-3">
+
+            <div class="col-lg-10 col-md-10">
+                <p class="h5"><i class="size-24" data-feather="filter"></i></p>
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle w-100 text-start" id="filter_state_dropwdown_button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Status
+                                </button>
+
+                                <div class="dropdown-menu" aria-labelledby="filter_state_dropdown_button">
+                                    <ul class="dropdown-item m-0 p-0" id="filter_state">
+                                        <li class="dropdown-item"><input name="filter_state" id="filter_state_c_f" class="ms-1" value="funktioniert" type="checkbox"> funktioniert</li>
+                                        <li class="dropdown-item"><input name="filter_state" id="filter_state_c_r" class="ms-1" value="reparierbar" type="checkbox"> reparierbar</li>
+                                        <li class="dropdown-item"><input name="filter_state" id="filter_state_c_u" class="ms-1" value="ungeprüft" type="checkbox"> ungeprüft</li>
+                                    </ul>
+                                </div>
+
+                           </div>
+
+
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle w-100 text-start" id="filter_check_by_dropwdown_button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Hinzugefügt von
+                                </button>
+
+                                <div class="dropdown-menu" id="filter_checked_by" aria-labelledby="filter_checked_by_dropdown_button">
+                                    <ul class="dropdown-item m-0 p-0" >
+                                        {% for row in users %}
+                                            <li class="dropdown-item"><input name="filter_checked_by" id="fc_{{row.user_id}}" value="{{row.user_id}}" class="ms-1" type="checkbox">
+                                                {{row.username}}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                            </div>
+
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle w-100 text-start" id="filter_edited_by_dropwdown_button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Zuletzt Bearbeitet von
+                                </button>
+
+                                <div class="dropdown-menu" aria-labelledby="filter_checked_by_dropdown_button">
+                                    <ul class="dropdown-item m-0 p-0" id="filter_edited_by">
+                                        {% for row in users %}
+                                            <li class="dropdown-item"><input name="filter_edited_by" id="fe_{{row.user_id}}" value="{{row.user_id}}" class="ms-1" type="checkbox">
+                                                {{row.username}}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-5 col-md-0"></div>
+
+                        </div>
+
+                    </div> <!-- eo sub-container -->
+
+                </div> <!-- eo col -->
+            <div class="col-lg-2 col-md-2"></div>
+
+        </div> <!-- eo row -->
+</form>
+</div>
+
+
+<!--- alle Anzeigen (deaktiviert wegen Anzahl-Attribut)
+<div class="container-fluid bg-white mt-3 pb-3" id="display_all">
+
+    <div class="row mt-3">
+        <div class="col-lg-11 col-md-11">
+
+        </div>
+        <div class="col-lg-1 col-md-1 align-self-end" >
+            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#show_info_all">
+                    <i class="feather-24" data-feather="help-circle"></i>
+            </button>
+        </div>
+    </div>
+
+
+     <div class="container-fluid scroll">
+            <p class="h5 mt-5"><u>Ersatzteile:</u></p>
+
+                <div class="row">
+                    {% for i in et_header %}
+                    <div class="col h6">{{i}} </div>
+                    {% endfor %}
+                </div>
+
+        {% for row in et_content %}
+
+        <div class="row">
+        {% for cell in row %}
+
+            {%if loop.index0 !=0 %}
+                <div class="col border border-secondary">{% if cell is none %} {% else %} {{ cell }} {% endif %}</div>
+            {%endif%}
+
+        {% endfor %}
+
+        </div>
+
+        {% endfor %}
+          <p class="mt-2 mb-2"> Mit Reparatur-Eintrag:</p>
+         {% for row in et_content_rep %}
+
+        <div class="row">
+        {% for cell in row %}
+
+            {%if loop.index0 !=0 %}
+                <div class="col border border-secondary">{% if cell is none %} {% else %} {{ cell }} {% endif %}</div>
+            {%endif%}
+
+        {% endfor %}
+
+        </div>
+
+        {% endfor %}
+
+
+    </div>
+
+    <div class="container-fluid scroll">
+            <p class="h5 mt-5"><u>Zubehör:</u></p>
+
+        <div class="row">
+            {% for i in zb_header %}
+            <div class="col h6">{{i}} </div>
+            {% endfor %}
+        </div>
+
+        {% for row in zb_content %}
+
+        <div class="row">
+        {% for cell in row %}
+            {%if loop.index0 !=0 %}
+                <div class="col border border-secondary">{% if cell is none %} {% else %} {{ cell }} {% endif %}</div>
+            {%endif%}
+        {% endfor %}
+
+        </div>
+
+        {% endfor %}
+        <p class="mt-2 mb-2"> Mit Reparatur-Eintrag:</p>
+        {% for row in zb_content_rep %}
+
+        <div class="row">
+        {% for cell in row %}
+            {%if loop.index0 !=0 %}
+                <div class="col border border-secondary">{% if cell is none %} {% else %} {{ cell }} {% endif %}</div>
+            {%endif%}
+        {% endfor %}
+
+        </div>
+
+        {% endfor %}
+
+
+    </div>
+
+    <div class="container-fluid scroll">
+        <p class="h5 mt-5"><u>Geräte:</u></p>
+
+        <div class="row">
+            {% for i in sonst_header %}
+            <div class="col h6">{{i}} </div>
+            {% endfor %}
+        </div>
+        {% for row in sonst_content %}
+
+        <div class="row">
+        {% for cell in row %}
+
+            {%if loop.index0 !=0 %}
+                <div class="col border border-secondary">{% if cell is none %} {% else %} {{ cell }} {% endif %}</div>
+            {%endif%}
+
+        {% endfor %}
+
+        </div>
+
+        {% endfor %}
+        <p class="mt-2 mb-2"> Mit Reparatur-Eintrag:</p>
+        {% for row in sonst_content_rep %}
+
+        <div class="row">
+        {% for cell in row %}
+
+            {%if loop.index0 !=0 %}
+                <div class="col border border-secondary">{% if cell is none %} {% else %} {{ cell }} {% endif %}</div>
+            {%endif%}
+
+        {% endfor %}
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+</div>
+
+ alles außer alle -> ---------------------------------------------------------------------------------------------->
+<div class="container-fluid pb-3 scroll bg-white" style="display:none;" id="display_rest">
+        <div class="row pt-3 m-3 mb-5">
+            <div class="col-auto">
+            <!-- dropdown menu -->
+                <button id="menu_dropdown_button" class="btn btn-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="feather-24" data-feather="menu"></i></button>
+                <div aria-labelledby="menu_dropdown_button" class="dropdown-menu">
+                    <ul class="dropdown-item">
+                        <li class="dropdown-item"><button class="btn btn-secondary" id="btn_delete_multiple" onclick="show_delete_fields();"><i class="feather-16 text-white" data-feather="shopping-bag"></i>
+                            Mehrere Löschen </button> </li>
+                        <li class="dropdown-item"><button class="btn btn-secondary" id="btn_sell_multiple" onclick="show_sale_fields();"> <i class="feather-16 text-white" data-feather="shopping-bag"></i>
+                            Für Verkauf auswählen</button> </li>
+                        <li class="dropdown-item"><button class="btn btn-secondary" id="btn_upload_multiple" onclick="show_upload_fields();"><i class="feather-16 text-white" data-feather="upload"></i>
+                            Mehrere hochladen</button> </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-1">
+                <span  data-bs-toggle="modal">
+                <button type="button" class="btn btn-outline-dark ms-2"  data-bs-toggle="tooltip" onclick="save_csv_ajax();" data-bs-placement="bottom" title="CSV-Datei der dargestellten Items erstellen.">
+                    <i class="feather-16" data-feather="save"></i>
+                </button>
+                </span>
+             </div>
+
+            <div class="col-lg-1">
+                <span id="csv_download_link" style="display:none;">
+                <a href="{{ url_for('inventory_bp.download')}}">Download CSV</a>
+                </span>
+            </div>
+            <div class="col-lg-6 col-md-8 text-center"><p class="h4"></p> <!-- Inventar placeholder (first row)--> </div>
+
+            <div class="col-lg-2 col-md-2">
+                <div id="sell_multiple" style="display:none;">
+                        <button class="mb-2 btn btn-primary" onclick="add_sale_items();"> <i class="feather-16 text-white" data-feather="shopping-bag"></i> Zu Verkauf hinzufügen</button>
+                        <button class="btn btn-secondary" onclick="hide_sale_fields();">Abbrechen</button>
+                </div>
+                <div  id="delete_multiple" style="display:none;">
+                        <button class="pe-2 btn btn-danger" onclick="delete_items();"><i class="feather-16 text-white" data-feather="trash-2"></i> Löschen</button>
+                        <button class="btn btn-secondary" onclick="hide_delete_fields();">Abbrechen</button>
+                </div>
+                <div id="upload_multiple" style="display:none;">
+                        <button class=" btn btn-primary mb-2" onclick="open_upload_item_multiple();" ><i class="feather-16 text-white" data-feather="upload" ></i> hochladen</button>
+                        <button class="btn btn-secondary" onclick="hide_upload_fields();">Abbrechen</button>
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-1 col-md-1" id="info"> <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#show_info">
+                                            <i class="feather-24" data-feather="help-circle"></i>
+                                           </button>
+            </div>
+
+        </div>
+
+        <div class="row m-3 align-items-baseline">
+
+            <div class="col-lg-2 col-md-2"> <p class="h6 text-end">Sortieren nach:</p> </div>
+            <div class="col-auto col-lg-2 col-md-3">
+                <select class="form-select border border-dark" id="select_sort" onchange="sort_ajax();">
+                    <option value="name">Name</option>
+                    <option value="add_date">zuletzt hinzugefügt </option>
+                    <option value="edit_date">zuletzt bearbeitet </option>
+                    <option value="id">ID</option>
+                    <option value="box_no">Kisten-ID</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col md-0"></div>
+            <div class="col-lg-2 col-md-2">
+                <div class="input-group rounded border border-dark">
+                <input type="search" class="form-control rounded " id="sn_search_value" aria-label="Search" aria-describedby="search-addon2" oninput="sort_ajax();" onkeydown="sort_ajax();" placeholder="Seriennummer..">
+                     <span class="input-group-text border-0 bg-muted text-dark" id="search-addon2">
+                        <i class="feather-16" data-feather="search"></i>
+                      </span>
+                </div>
+
+            </div>
+
+            <div class="col-lg-2 col-md-2">
+
+                <div class="input-group rounded border border-dark">
+
+                <input type="search" class="form-control rounded " id="name_search_value" aria-label="Search" aria-describedby="search-addon" oninput="sort_ajax();" onkeydown="sort_ajax();" placeholder="Bezeichnung..">
+                     <span class="input-group-text border-0 bg-muted text-dark" id="search-addon">
+                        <i class="feather-16" data-feather="search"></i>
+                      </span>
+                </div>
+            </div>
+
+             <div class="col-lg-1 col-md-1 ms-2">
+                <span  data-bs-toggle="modal" data-bs-target="#sales_card">
+                <button type="button" class="btn btn-dark"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Für Verkauf ausgewählte Items.">
+
+                    <i class="feather-16" data-feather="shopping-bag"></i>
+                </button>
+                </span>
+
+            </div>
+
+        </div>
+
+
+<div id="content"> <!-- content container -->
+
+</div> <!-- eo "content" container -->
+
+</div> <!-- eo big container -->
+
+
+<!-- Modal (card sales) -->
+<div class="modal fade" id="sales_card" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Zum Verkauf ausgewählte Items</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <div id="display_sale_items"></div>
+      </div>
+      <div class="modal-footer text-center" id="reverse_cart_buttons">
+        <button type="button" class="btn btn-danger" onclick="clear_reverse_cart();"> Clear</button>
+        <button type="button" class=" btn btn-success" data-bs-toggle="modal" data-bs-target="#sell_reverse_cart_content">Verkauf abschließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal (sell reverse card content) -->
+
+<div class="modal fade" id="sell_reverse_cart_content" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                              <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title">Verkauf abschließen</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                    <form method="POST">
+                                  <div class="modal-body">
+
+
+							                    <div class="row mt-3">
+							                        <div class="col-lg-1 col-md-1"></div>
+							                        <div class="col-lg-5 col-md-5 h6">Gesamtpreis (€): </div>
+							                        <div class="col-lg-5 col-md-5">
+                                                        <input class="form-control" name="price" type="text" pattern="[0-9]{1,4},[0-9]{2}" placeholder="10,00" required>
+                                                    </div>
+							                        <div class="col-lg-1 col-md-1"></div>
+							                    </div>
+
+                                               <div class="row mt-3">
+							                        <div class="col-lg-1 col-md-1"></div>
+							                        <div class="col-lg-5 col-md-5 h6">zusätzliche Beschreibung</div>
+							                        <div class="col-lg-5 col-md-5">
+							                         <textarea class="form-control border border-secondary" name="description" rows="3"></textarea>
+							                        </div>
+							                        <div class="col-lg-1 col-md-1"></div>
+							                   </div>
+
+                                  </div>
+                                  <div class="modal-footer justify-content-center">
+                                    <button type="submit" name="sell_reverse_cart" class="btn btn-primary">Verkauf abschließen</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                                  </div>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+
+<div class="modal fade" id="show_info" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" >Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+         <p>Es werden prinzipiell nur verfügbare Items in der Übersicht angezeigt - d.h. alle, die: </p>
+            <ul>
+                <li> nicht an einen Auftrag geknüpft sind und</li>
+                <li> nicht geuploaded worden sind </li>
+                <li> nicht als Ersatzteil in einer Reparatur verwendet werden </li>
+            </ul>
+            <br>
+        <p>Items, die sich in Reparatur befinden (gelb) können nicht verkauft werden.</p>
+        <p>Items mit einer abgeschlossenen Reparatur (grün) können nur einzeln verkauft werden.</p>
+        <p>Die Löschung von Items mit Reparatur-Einträgen ist unter "Details" möglich.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="show_info_all" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Es werden prinzipiell nur verfügbare Items in der Übersicht angezeigt - d.h. alle, die: </p>
+            <ul>
+                <li> nicht an einen Auftrag geknüpft sind</li>
+                <li> nicht geuploaded worden sind und</li>
+                <li> nicht als Ersatzteil in einer Reparatur verwendet werden </li>
+            </ul>
+            <br>
+        <p>Gleiche Items (Kategorie, Item-Bezeichnung, -Status und -Beschreibung, ausgenommen: Seriennummer) sind in dieser Ansicht zusammengefasst.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="display_upload_item" class="overlay">
+    <div class="overlay-content">
+        <button class="btn btn-danger" onclick="close_upload_item();"> <i class="feather-24" data-feather="x"></i></button>
+
+        <fieldset class="add_customer">
+        <div class="container-fluid">
+            <div class="row mt-3 mb-3">
+                <div class="col-lg-4">
+                    <button  class="btn btn-primary" onclick="open_add_upload();"> <i class="feather-16" data-feather="plus-circle"></i>  Neuer Upload </button>
+                </div>
+                <div class="col-lg-8"></div>
+            </div>
+
+            <div class="row mb-3">
+
+                <div class=" col-lg-6">
+                    <div class="input-group">
+                    <div class="form-outline">
+                        <input type="search" id="upload_search_by_id" class="form-control" placeholder="ID" >
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="ajax_upload_id_search();">
+                        <i class="feather-24" data-feather="arrow-right"></i>
+                    </button>
+                    </div>
+                </div>
+
+                <div class=" col-lg-6">
+                    <div class="input-group">
+                    <div class="form-outline">
+                      <input type="search" id="upload_search_by_name" placeholder="Bezeichnung" class="form-control" oninput="ajax_upload_name_search(this.value);" onkeydown="ajax_upload_name_search(this.value);">
+                    </div>
+                    <span class="input-group-text border-0" >
+                      <i  class="feather-24" data-feather="search"></i>
+                    </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="container-fluid" id="upload_results">
+
+
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<div id="display_add_upload" class="overlay">
+    <div class="overlay-content">
+        <button class="btn btn-primary" onclick="close_add_upload();"> <i class="feather-24" data-feather="arrow-left"></i></button>
+
+        <fieldset class="add_customer">
+                   <div class="container-fluid">
+        <form method="POST">
+                <div class="row mt-3 mb-3">
+                    <div class="col-lg-3 h6 text-end">
+                       Bezeichnung:
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="new_upload_name" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3 h6 text-end">
+                        Preis:
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="new_upload_price" type="text" pattern="[0-9]{'{1,4}'},[0-9]{'{2}'}" placeholder="10,00" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3 h6 text-end">
+                       Beschreibung:
+                    </div>
+                    <div class="col-lg-9">
+                        <textarea class="form-control border border-dark" name="new_upload_description" rows="5"></textarea>
+
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3"> </div>
+                    <div class="col-lg-9"> <button type="submit" name="add_upload" class="btn btn-primary">Hinzufügen</button></div>
+                </div>
+            <input type="hidden" name="item_id" id="add_upload_item_id" value="">
+            </form>
+            </div>
+
+        </fieldset>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+//go to saved scroll position on document ready
+
+    if ( typeof $.cookie("scroll") !== 'undefined' ) {
+        $(document).scrollTop( $.cookie("scroll") );
+    }
+
+    if($.cookie('kat')!='alle'){
+        $('#display_all').hide();
+    }
+
+    if ( typeof $.cookie("kat") !== 'undefined' ) {
+        console.log($.cookie("kat"));
+        set_filter_based_on_cookies();
+        $('#kategorie').val($.cookie('kat'));
+        set_form($.cookie('kat'));
+        start_first_sort_ajax_with_delay();
+    }else{
+    console.log("ewdfwef");
+        $('#kategorie').val('alle').change()
+        location.reload();
+    }
+
+    get_sale_items();
+
+}); //eo document ready
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+//save csv file-----------------------------------------
+
+function save_csv_ajax() {
+
+    kat=$('#kategorie').val();
+
+    sort_val='0';
+    sort_val=$('#select_sort').val();
+    name_search_val=$('#name_search_value').val();
+    sn_search_val=$('#sn_search_value').val();
+    lvl1='0';
+    lvl2='0';
+    lvl3='0';
+
+    const filter_state=[];
+
+    $('#filter_state :input').each(function () {
+        if(this.checked){
+            filter_state.push(this.value);
+        }
+    });
+
+    const filter_checked_by=[]
+
+    $('#filter_checked_by :input').each(function () {
+        if(this.checked){
+            filter_checked_by.push(this.value);
+        }
+    });
+
+    const filter_edited_by=[];
+
+    $('#filter_edited_by :input').each(function () {
+        if(this.checked){
+            filter_edited_by.push(this.value);
+        }
+    });
+
+    switch(kat){
+        case 'anderes':
+                lvl1=$('#anderes_top_kat').val();
+
+                if(lvl1 != 'alle'){
+                    lvl2=$('#anderes_sub_kat').val();
+                }
+            break;
+        case 'ersatzteile':
+                lvl1=$('#ersatzteile_et').val();
+
+                lvl2=$('#ersatzteile_top_kat').val();
+
+                if(lvl2!='alle'){
+                    lvl3=$('#ersatzteile_sub_kat').val();
+                }
+            break;
+        case 'zubehoer':
+                lvl1=$('#zubehoer_zb').val();
+                lvl2=$('#zubehoer_top_kat').val();
+                if(lvl2!='alle'){
+                    lvl3=$('#zubehoer_sub_kat').val();
+                }
+            break;
+        default: return 0
+    }
+
+    $.ajax({
+    					url: "{{ url_for( 'inventory_bp.create_csv_ajax' ) }}",
+    					type: "GET",
+    					data: {'sort_value':sort_val, 'name_search_val':name_search_val, 'sn_search_val': sn_search_val, 'kat':kat, 'lvl1':lvl1,
+    					        'lvl2':lvl2, 'lvl3':lvl3, 'filter_state':JSON.stringify(filter_state),
+    					         'filter_checked_by': JSON.stringify(filter_checked_by), 'filter_edited_by' : JSON.stringify(filter_edited_by) },
+    					success: function(resp){
+    					    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim erzeugen der CSV Datei (create_csv_ajax)");
+                                return;
+					        }
+
+					        $('#csv_download_link').show();
+
+                        }
+    	});
+}
+
+
+//uploads-----------------------------------------------
+function show_upload_fields(){
+
+    var checkboxes = $('#content input:checkbox');
+    checkboxes.show();
+    $('#upload_multiple').show();
+    disable_hamburger_button();
+}
+
+function hide_upload_fields(){
+    var checkboxes = $('#content input:checkbox');
+    checkboxes.hide();
+    $('#upload_multiple').hide();
+    enable_hamburger_button();
+
+}
+
+//overlay--------------------------------------------------
+function open_upload_item(i_id){
+    $("#display_upload_item").css("width","100%");
+    $("#add_upload_item_id").val(i_id);
+    ajax_upload_name_search('');
+}
+
+function open_upload_item_multiple(){
+    $("#display_upload_item").css("width","100%");
+
+        var checkboxes = $('#content input:checkbox');
+
+    //ids of checked items in array
+    var ids = [];
+     $.each($('#content input:checkbox:checked'), function(){
+        ids.push($(this).val());
+    });
+
+    // if select all is checked, remove first element of list, since it is part of the list
+    if (ids[0] == 'on'){
+        ids.shift();
+    }
+
+    $("#add_upload_item_id").val(ids);
+    ajax_upload_name_search('');
+}
+
+function close_upload_item() {
+    $("#display_upload_item").css("width","0%");
+}
+
+const open_add_upload=async() => {
+    $("#display_upload_item").css("width", "0%");
+    await delay(500);
+    $("#display_add_upload").css("width","100%");
+}
+
+const close_add_upload=async() => {
+    $("#display_add_upload").css("width","0%");
+    await delay(500);
+    $("#display_upload_item").css("width", "100%");
+}
+
+function ajax_upload_name_search(val){
+
+
+$.ajax({
+    					url: "{{ url_for( 'upload_bp.upload_name_search_ajax' ) }}",
+    					type: "GET",
+    					data: {'search_val':val },
+    					success: function(resp){
+
+    					    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim Laden der Uploads (ajax_upload_name_search)");
+                                return;
+					        }
+
+
+                            if(resp=="empty"){
+                                html_str="<p> Kein passender Upload gefunden. </p>";
+                            }else{
+                                    html_str="";
+        			            for(const element of resp){
+        			                html_str+=`<div class="row mb-3"> <div class="col">`;
+        			                html_str+=`<form method="POST"> <input type="hidden" name="upload_id" value=`;
+                                    html_str+=element["id"]+">";
+                                    html_str += `<input type="hidden" name="upload_item_id" value=`;
+                                    html_str+= $('#add_upload_item_id').val() +">";
+                                    html_str+="<button type=\"submit\" class=\"btn btn-outline-dark w-75 text-start\">";
+                                    html_str+="<p><b>"+element["id"] +"</b>: ";
+                                    html_str+=element["name"] +"</p>";
+                                    html_str+="</button> </form></div> </div>";
+        		                }// eo for
+
+        		            }//eo else
+                            $('#upload_results').html(html_str);
+    						feather.replace();
+    		  			}
+    	});
+
+}
+
+
+function ajax_upload_id_search(val){
+
+
+
+$.ajax({
+    					url: "{{ url_for( 'upload_bp.upload_id_search_ajax' ) }}",
+    					type: "GET",
+    					data: {'id': $('#upload_search_by_id').val() },
+    					success: function(resp){
+
+    					    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim Laden der Uploads (ajax_upload_id_search)");
+                                return;
+					        }
+
+                            if(resp=="empty"){
+                                html_str="<p> Kein Upload mit dieser ID gefunden. </p>";
+                            }else{
+                                    html_str="";
+        			            for(const element of resp){
+        			                html_str+=`<div class="row mb-3"> <div class="col">`;
+        			                html_str+=`<form method="POST"> <input type="hidden" name="single_upload_id" value=`;
+                                    html_str+=element["id"]+">";
+                                    html_str += `<input type="hidden" name="single_upload_item_id" value=`;
+                                    html_str+= $('#add_upload_item_id').val() +">";
+                                    html_str+="<button type=\"submit\" class=\"btn btn-outline-dark w-75 text-start\">";
+                                    html_str+="<p><b>"+element["id"] +"</b>: ";
+                                    html_str+=element["name"] +"</p>";
+                                    html_str+="</button> </form></div> </div>";
+        		                }// eo for
+
+        		            }//eo else
+                            $('#upload_results').html(html_str);
+    						feather.replace();
+    		  			}
+    	});
+
+}
+//--eo overlay------------------------------------------
+
+
+//eo uploads------------------------------------------
+var first_call=0;
+
+const start_first_sort_ajax_with_delay=async() =>{
+
+    if($.cookie('kat')!='alle'){
+
+            set_categories_based_on_cookies();
+            await delay(500);
+            sort_ajax();
+
+    }
+
+                $('#preload_image').hide();
+
+}
+
+
+//sales----------------------------------------------------------------------------------------------------------------
+
+function show_sale_fields(){
+
+    var checkboxes = $('#content input:checkbox');
+    checkboxes.show();
+    $('#sell_multiple').show();
+    disable_hamburger_button();
+}
+
+function hide_sale_fields(){
+    var checkboxes = $('#content input:checkbox');
+    checkboxes.hide();
+    $('#sell_multiple').hide();
+    enable_hamburger_button();
+
+}
+
+function add_sale_items(){
+
+    var checkboxes = $('#content input:checkbox');
+
+    //ids of checked items in array
+    var ids = [];
+     $.each($('#content input:checkbox:checked'), function(){
+        ids.push($(this).val());
+    });
+
+    // if select all is checked, remove first element of list, since it is part of the list
+    if (ids[0] == 'on'){
+        ids.shift();
+    }
+
+    $.ajax({
+				url: "{{ url_for( 'inventory_bp.ajax_add_sale_items' ) }}",
+				type: "GET",
+				data: {'ids': JSON.stringify(ids)},
+				success: function(resp){
+
+				    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener Item-Einträge aus der Session (ajax_add_sale_items)");
+                                return;
+					}
+
+                    if(resp=='max_reached'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Item(s) konnte(n) nicht hinzugefügt werden. Maximum von 100 Items überschritten!");
+                                return;
+					}
+
+
+					if(resp=='empty'){
+					    		$('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Keine Items ausgewählt!");
+                                return;
+					}
+
+					$('#ajax_flash_success').show();
+					$('#ajax_flash_success_msg').html(resp+" Item(s) hinzugefügt!");
+
+					hide_sale_fields();
+					get_sale_items();
+					sort_ajax();
+	  			}
+    });
+
+
+}
+
+
+//ajax card modal inhalt aktualisieren
+function get_sale_items(){
+
+    $.ajax({
+				url: "{{ url_for( 'inventory_bp.ajax_get_sale_items' ) }}",
+				type: "GET",
+				data: {},
+				success: function(resp){
+
+                    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener Inventar-Einträge aus der Session. (ajax_get_sale_items)");
+                                return;
+					}
+
+                    if(resp != 'empty'){
+					html_str="";
+
+                    for(const element of resp){
+                        if ( ! element['Bezeichnung']) { bez=''; }else{ bez='('+element['Bezeichnung']+')';}
+					    html_str += "<div class=\"row mt-3\"> <div class=\"col-lg-10 col-md-10\"> <b>" + element['ID'] + '&nbsp;'+ element['first'] + '</b>&nbsp;' + element['Top-Kategorie'] + '&nbsp;' + element['Kategorie'] + '&nbsp;' +bez +"</div>";
+					    html_str += `<div class="col-lg-2 col-md-2"><button class="btn-danger" name="i_id" value="` +element['ID']+ `" type="button" onclick="clear_single_sale_item(this.value);"><i class="feather-16" data-feather="delete"></i></button></div></div>`
+					}
+					   $('#display_sale_items').html(html_str);
+					   $('#reverse_cart_buttons').show();
+					    feather.replace();
+					}else{
+					   $('#display_sale_items').html('<p>Keine Items für den Verkauf ausgewählt.</p>');
+                        $('#reverse_cart_buttons').hide();
+                    }
+					//sort_ajax();
+	  			}
+    });
+
+}
+
+function clear_single_sale_item(val){
+
+$.ajax({
+				url: "{{ url_for( 'inventory_bp.ajax_clear_single_sale_item' ) }}",
+				type: "GET",
+				data: {'id': val},
+				success: function(resp){
+				    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim entfernen des Items aus der Session. (ajax_clear_single_item)");
+                                return;
+					}
+
+					get_sale_items();
+	  			}
+    });
+
+
+}
+
+function clear_reverse_cart(){
+
+    $.ajax({
+				url: "{{ url_for( 'inventory_bp.ajax_clear_sale_items' ) }}",
+				type: "GET",
+				data: {},
+				success: function(resp){
+					console.log("cart cleared");
+					get_sale_items();
+					sort_ajax();
+	  			}
+    });
+
+}
+//sort ajax-------------------------------------------------------------------------------------------------------------
+
+function sort_ajax(){
+    $('#csv_download_link').hide();
+    hide_delete_fields();
+    hide_sale_fields();
+    hide_upload_fields();
+    kat=$('#kategorie').val();
+
+    //if(kat=='alle'){
+      //  $('#main_form').submit();
+       // return 0;
+    //}
+
+    $('#display_all').hide();
+    $('#display_rest').show();
+
+    sort_val='0';
+    sort_val=$('#select_sort').val();
+    name_search_val=$('#name_search_value').val();
+    sn_search_val=$('#sn_search_value').val();
+    lvl1='0';
+    lvl2='0';
+    lvl3='0';
+
+    const filter_state=[];
+
+    $('#filter_state :input').each(function () {
+        if(this.checked){
+            filter_state.push(this.value);
+        }
+    });
+
+    const filter_checked_by=[]
+
+    $('#filter_checked_by :input').each(function () {
+        if(this.checked){
+            filter_checked_by.push(this.value);
+        }
+    });
+
+    const filter_edited_by=[];
+
+    $('#filter_edited_by :input').each(function () {
+        if(this.checked){
+            filter_edited_by.push(this.value);
+        }
+    });
+
+    switch(kat){
+        case 'anderes':
+                lvl1=$('#anderes_top_kat').val();
+
+                if(lvl1 != 'alle'){
+                    lvl2=$('#anderes_sub_kat').val();
+                }
+            break;
+        case 'ersatzteile':
+                lvl1=$('#ersatzteile_et').val();
+
+                lvl2=$('#ersatzteile_top_kat').val();
+
+                if(lvl2!='alle'){
+                    lvl3=$('#ersatzteile_sub_kat').val();
+                }
+            break;
+        case 'zubehoer':
+                lvl1=$('#zubehoer_zb').val();
+                lvl2=$('#zubehoer_top_kat').val();
+                if(lvl2!='alle'){
+                    lvl3=$('#zubehoer_sub_kat').val();
+                }
+            break;
+        default: return 0
+    }
+
+
+    //'filter_state':, 'filter_checked_by':
+    $.ajax({
+    					url: "{{ url_for( 'inventory_bp.sort_ajax' ) }}",
+    					type: "GET",
+    					data: {'sort_value':sort_val, 'name_search_val':name_search_val, 'sn_search_val': sn_search_val, 'kat':kat, 'lvl1':lvl1,
+    					        'lvl2':lvl2, 'lvl3':lvl3, 'filter_state':JSON.stringify(filter_state),
+    					         'filter_checked_by': JSON.stringify(filter_checked_by), 'filter_edited_by' : JSON.stringify(filter_edited_by) },
+    					success: function(resp){
+    					    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen der Inventar Einträge vom Server (sort_ajax)");
+                                return;
+					        }
+
+    						$('#content').html(resp);
+                               console.log(resp);
+    						feather.replace();
+    		  			}
+    	});
+
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+function delete_items(){
+
+    var checkboxes = $('#content input:checkbox');
+    //ids of checked items in array
+    var ids = [];
+     $.each($('#content input:checkbox:checked'), function(){
+        ids.push($(this).val());
+    });
+
+    // if select all is checked, remove first element of list, since it is part of the list
+    if (ids[0] == 'on'){
+        ids.shift();
+    }
+
+   $.ajax({
+				url: "{{ url_for( 'inventory_bp.ajax_delete_multiple_items' ) }}",
+				type: "GET",
+				data: {'ids': JSON.stringify(ids)},
+				success: function(resp){
+
+				    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim löschen der Items (ajax_delete_multiple_items)");
+                                return;
+					}
+
+					if(resp=='empty'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Keine Items ausgewählt!");
+                                return;
+					}
+
+
+					$('#ajax_flash_success').show();
+
+					$('#ajax_flash_success_msg').html(resp + " Item(s) wurden gelöscht.");
+
+					sort_ajax();
+	  			}
+    });
+
+}
+
+function show_delete_fields(){
+    var checkboxes = $('#content input:checkbox');
+    checkboxes.show();
+    $('#delete_multiple').show();
+    disable_hamburger_button();
+
+}
+
+function hide_delete_fields(){
+    var checkboxes = $('#content input:checkbox');
+    checkboxes.hide();
+    $('#delete_multiple').hide();
+    enable_hamburger_button();
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+$('#kategorie').change(function(){
+    set_form($('#kategorie').val());
+});
+
+function set_form(lang){
+
+    //hideall
+    $('#sub_kat_lvl1').hide();
+    $('#sub_kat_lvl2').hide();
+    $('#sub_kat_lvl3').hide();
+
+    switch(lang){
+
+    case "ersatzteile":
+        start_et_ajax();
+        break;
+    case "zubehoer":
+        start_zb_ajax();
+        break;
+    case "anderes":
+        a_top_kat();
+        break;
+    default:
+        console.log("none");
+
+}
+
+}
+
+//ersatzteile-----------------------------------------------------------------------------------------------------------
+
+function start_et_ajax(){
+
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: 'ersatzteile'},
+					success: function(resp){
+						if(resp !=0){
+
+						    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" onchange="et_top_kat(this.value); save_kats();" id="ersatzteile_et" name="sub_kat_lvl1">`;
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+						}
+						html_str+="</select>";
+
+						$('#sub_kat_lvl1').html(html_str);
+                        $('#sub_kat_lvl1').show();
+
+						et_top_kat($('#ersatzteile_et').val());
+		  			}
+	});
+
+}
+
+
+function et_top_kat(val){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {et: val},
+					success: function(resp){
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" onchange="et_sub_kat(this.value); save_kats();" id="ersatzteile_top_kat" name="sub_kat_lvl2">`;
+                            html_str += "<option value=\"alle\" selected> alle </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+						html_str+="</select>";
+
+						$('#sub_kat_lvl2').html(html_str);
+						$('#sub_kat_lvl2').show();
+
+						et_sub_kat( $("#ersatzteile_top_kat").val());
+		  			}
+	});
+}
+
+function et_sub_kat(val){
+
+if(val=='alle'){
+            $('#sub_kat_lvl3').hide();
+	}else{
+		$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {et_top_kat: val, et_for_top_kat: $('#ersatzteile_et').val()},
+					success: function(resp){
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" onchange="save_kats();" id="ersatzteile_sub_kat" name="sub_kat_lvl3">`;
+								html_str += "<option value=\"alle\" selected> alle </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#sub_kat_lvl3').html(html_str);
+						$('#sub_kat_lvl3').show();
+
+		  			}
+		});
+	}
+
+}
+
+//zubehör---------------------------------------------------------------------------------------------------------------
+
+function start_zb_ajax(){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: 'zubehoer'},
+					success: function(resp){
+
+						if(resp !=0){
+
+						    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" onchange="zb_top_kat(this.value); save_kats();" id="zubehoer_zb" name="sub_kat_lvl1">`;
+
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+						}
+						html_str+="</select>";
+
+						$('#sub_kat_lvl1').html(html_str);
+                        $('#sub_kat_lvl1').show();
+
+						zb_top_kat($('#zubehoer_zb').val());
+		  			}
+	});
+}
+
+function zb_top_kat(val){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {zb: val},
+					success: function(resp){
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" onchange="zb_sub_kat(this.value); save_kats();" id="zubehoer_top_kat" name="sub_kat_lvl2">`;
+                            html_str += "<option value=\"alle\" selected> alle </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#sub_kat_lvl2').html(html_str);
+                        $('#sub_kat_lvl2').show();
+
+						zb_sub_kat($('#zubehoer_top_kat').val());
+		  			}
+	});
+}
+
+function zb_sub_kat(val){
+if(val=='alle'){
+            $('#sub_kat_lvl3').hide();
+	}else{
+		$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {zb_top_kat: val, zb_for_top_kat: $('#zubehoer_zb').val()},
+					success: function(resp){
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" onchange="save_kats();" id="zubehoer_sub_kat" name="sub_kat_lvl3">`;
+								html_str += "<option value=\"alle\" selected> alle </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#sub_kat_lvl3').html(html_str);
+                        $('#sub_kat_lvl3').show();
+
+
+
+		  			}
+		});
+	}
+}
+
+//sonstiges-------------------------------------------------------------------------------------------------------------
+
+function a_top_kat(){
+
+	$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {kat: 'anderes'},
+					success: function(resp){
+
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" onchange="a_sub_kat(this.value); save_kats();" id="anderes_top_kat" name="sub_kat_lvl1">`;
+                                html_str += "<option value=\"alle\" selected> alle </option>";
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+							html_str += "<option value=\"";
+							html_str += elements;
+							html_str += "\">";
+							html_str += elements;
+							html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#sub_kat_lvl1').html(html_str);
+                        $('#sub_kat_lvl1').show();
+
+						a_sub_kat($('#anderes_top_kat').val());
+		  			}
+	});
+}
+
+function a_sub_kat(val){
+
+if(val=='alle'){
+            $('#sub_kat_lvl2').hide();
+	}else{
+		$.ajax({
+					url: "{{ url_for( 'inventory_bp.ajax_responsive_categories_input' ) }}",
+					type: "GET",
+					data: {a_top_kat: val},
+					success: function(resp){
+
+					        if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim anzeigen der vorhandenen Kategorien (ajax_responsive_categories_input).");
+                                return;
+					        }
+
+							var html_str= `<select class="form-select border border-dark" id="anderes_sub_kat" onchange="save_kats();" name="sub_kat_lvl2">`;
+								html_str += "<option value=\"alle\" selected> alle </option>";
+
+							var iterator = resp.values();
+
+							for(let elements of iterator){
+								html_str += "<option value=\"";
+								html_str += elements;
+								html_str += "\">";
+								html_str += elements;
+								html_str += "</option>";
+							}
+
+						html_str+="</select>";
+
+						$('#sub_kat_lvl2').html(html_str);
+						$('#sub_kat_lvl2').show();
+
+		  			}
+		});
+	}
+}
+
+//CHANGE-ITEM-AMOUNT----------------------------------------------------------------------------------------------------
+const ajax_change_item_amount=async(i_id) =>{
+
+    await delay(500);
+    amount=$('#item_amount'+i_id).val();
+    if(amount<1){
+        return;}
+    $.ajax({
+    					url: "{{ url_for( 'inventory_bp.change_item_amount_ajax' ) }}",
+    					type: "GET",
+    					data: {'item_id':i_id, 'amount':amount},
+    					success: function(resp){
+
+    					    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim Ändern der Item-Anzahl (change_item_amount_ajax)");
+                                return;
+					        }
+
+					        //einzelpreis holen:
+                            single_price=$('#single_price'+i_id).html()
+                            if(typeof(single_price)=="undefined"){
+					            return;         //single price is undefined (0)
+					        }
+					        single_price=single_price.replace(',','')
+					        single_price=single_price.replace('€','')
+
+					        //gesamtpreis errechnen:
+                            single_price_int=parseInt(single_price)
+                            total_price_int=single_price_int*amount;
+
+					        //gesamtpreis ersetzen:
+                            total_price=total_price_int.toString();
+                            total_price_first=total_price.slice(0,-2);
+                            total_price_last=total_price.slice(-2);
+                            total_price=total_price_first+','+total_price_last+' €';
+                            $('#total_price'+i_id).html('('+total_price+')');
+					    }
+    });
+}
+
+
+//GENERAL---------------------------------------------------------------------------------------------------------------
+
+function disable_hamburger_button(){
+    $("#btn_delete_multiple").prop("disabled",true);
+    $("#btn_sell_multiple").prop("disabled",true);
+    $("#btn_upload_multiple").prop("disabled",true);
+}
+
+function enable_hamburger_button(){
+        $("#btn_delete_multiple").prop("disabled",false);
+        $("#btn_sell_multiple").prop("disabled",false);
+        $("#btn_upload_multiple").prop("disabled",false);
+}
+
+    function select_all_change(){
+           if ($('#select_all').is(':checked') ){
+                 $.each($('#content input:checkbox'), function(){
+
+                     if($(this).attr('id')!='select_all'){
+                         $(this).prop('checked',true);
+                     }
+                 });
+
+           }else {
+                 $.each($('#content input:checkbox'), function(){
+                    if($(this).attr('id')!='select_all'){
+                         $(this).prop('checked',false);
+                     }
+                 });
+           }
+
+    }
+
+//COOKIES---------------------------------------------------------------------------------------------------------------
+
+const set_categories_based_on_cookies=async() =>{
+
+first_call=1;
+        switch($.cookie("kat")){
+            case "anderes":
+                a_top_kat();
+                await delay(100);
+                if($.cookie("sub_kat_lvl1")!=0){
+                    $("#anderes_top_kat").val($.cookie("sub_kat_lvl1")).change();
+                }
+                await delay(100);
+                if($.cookie("sub_kat_lvl2")!=0){
+                    $('#anderes_sub_kat').val($.cookie("sub_kat_lvl2")).change();
+                }
+            break;
+            case "zubehoer":
+                start_zb_ajax();
+                await delay(100);
+                if($.cookie("sub_kat_lvl1")!=0){
+                    $("#zubehoer_zb").val($.cookie("sub_kat_lvl1")).change();
+                }
+                await delay(100);
+                if($.cookie("sub_kat_lvl2")!=0){
+                    $("#zubehoer_top_kat").val($.cookie("sub_kat_lvl2")).change();
+                }
+                await delay(100);
+                if($.cookie("sub_kat_lvl3")!=0){
+                    $("#zubehoer_sub_kat").val($.cookie("sub_kat_lvl3")).change();
+                }
+            break;
+            case "ersatzteile":
+                    start_et_ajax();
+                    await delay(100);
+                    if($.cookie("sub_kat_lvl1")!=0){
+                         $("#ersatzteile_et").val($.cookie("sub_kat_lvl1")).change();
+
+                    }
+                    await delay(100);
+                    if($.cookie("sub_kat_lvl2")!=0){
+
+                        $("#ersatzteile_top_kat").val($.cookie("sub_kat_lvl2")).change();
+                    }
+                    await delay(100);
+                    if($.cookie("sub_kat_lvl3")!=0){
+                        $("#ersatzteile_sub_kat").val($.cookie("sub_kat_lvl3")).change();
+                    }
+
+
+            break;
+            default:
+                console.log("");
+                break;
+        }
+first_call=0;
+
+}
+
+function set_filter_based_on_cookies(){
+if($.cookie('f_s_c_f')==1){
+    $('#filter_state_c_f').prop('checked',true);
+}
+if($.cookie('f_s_c_r')==1){
+    $('#filter_state_c_r').prop('checked',true);
+}
+if($.cookie('f_s_c_u')==1){
+    $('#filter_state_c_u').prop('checked',true);
+}
+
+if($.cookie('f_cb_c_n')==1){
+    $('#filter_checked_by_c_n').prop('checked',true);
+}
+if($.cookie('f_cb_c_e')==1){
+    $('#filter_checked_by_c_e').prop('checked',true);
+}
+if($.cookie('f_cb_c_p')==1){
+    $('#filter_checked_by_c_p').prop('checked',true);
+}
+if($.cookie('f_cb_c_a')==1){
+    $('#filter_checked_by_c_a').prop('checked',true);
+}
+
+}
+//function is triggered by clicking details/ delete button
+function save_scroll_pos(){
+    // Set a cookie that holds the scroll position.
+    $.cookie("scroll", $(document).scrollTop(), { secure: true } );
+}
+
+//triggered by submitting main form
+$('#btn_sbm').on("click", function() {
+
+        $.cookie('scroll', $(document).scrollTop(), { path: '/products', secure: true} );
+});
+
+//save_kats called on every selection changed
+//save_kats loaded on every post request
+function save_kats(){
+
+if (first_call==1){
+    return;
+}
+
+$.cookie('kat', $('#kategorie').val(), { path: '/products', secure: true});
+
+        //set all cookie values to zero
+        set_cookies_null();
+
+        //set cookie values based on selection
+        switch($('#kategorie').val()){
+
+            case "ersatzteile":
+
+                if( $('#ersatzteile_top_kat').val() == 'alle'){
+                    $.cookie('sub_kat_lvl1', $('#ersatzteile_et').val(), { path: '/products', secure: true});
+                    $.cookie('sub_kat_lvl2', 'alle', { path: '/products', secure: true});
+                }else{
+                    $.cookie('sub_kat_lvl1', $('#ersatzteile_et').val(), { path: '/products', secure: true});
+                    $.cookie('sub_kat_lvl2', $('#ersatzteile_top_kat').val(), { path: '/products', secure: true});
+                    $.cookie('sub_kat_lvl3', $('#ersatzteile_sub_kat').val(), { path: '/products', secure: true});      //alle
+                }
+                break;
+            case "zubehoer":
+
+                if( $('#zubehoer_top_kat').val() == 'alle'){
+                    $.cookie('sub_kat_lvl1', $('#zubehoer_zb').val(), { path: '/products', secure: true});
+                    $.cookie('sub_kat_lvl2', 'alle', { path: '/products', secure: true});
+                }else{
+                    $.cookie('sub_kat_lvl1', $('#zubehoer_zb').val(), { path: '/products', secure: true});
+                    $.cookie('sub_kat_lvl2', $('#zubehoer_top_kat').val(), { path: '/products', secure: true});
+                    $.cookie('sub_kat_lvl3', $('#zubehoer_sub_kat').val(), { path: '/products', secure: true});      //alle
+                }
+                break;
+
+            case "anderes":
+                if ($('#anderes_top_kat').val() == 'alle'){
+                    $.cookie('sub_kat_lvl1', 'alle', { path: '/products', secure: true});
+                }else{
+                    $.cookie('sub_kat_lvl1', $('#anderes_top_kat').val(), { path: '/products', secure: true});
+                    $.cookie('sub_kat_lvl2', $('#anderes_sub_kat').val(), { path: '/products', secure: true});
+                }
+                break;
+            default:
+                break;
+
+        } //eo switch
+
+        //set cookie values for filters
+        if ($('#filter_state_c_f').is(":checked")){
+            $.cookie('f_s_c_f',1, { path: '/products', secure: true});
+        }
+
+        if ($('#filter_state_c_r').is(":checked")){
+            $.cookie('f_s_c_r',1, { path: '/products', secure: true});
+        }
+        if ($('#filter_state_c_u').is(":checked")){
+            $.cookie('f_s_c_u',1, { path: '/products', secure: true});
+        }
+
+        const filter_checked_by=[]
+
+        if($('#filter_checked_by_c_n').is(":checked")){
+            $.cookie('f_cb_c_n',1, { path: '/products', secure: true});
+        }
+        if($('#filter_checked_by_c_p').is(":checked")){
+            $.cookie('f_cb_c_p',1, { path: '/products', secure: true});
+        }
+        if($('#filter_checked_by_c_e').is(":checked")){
+            $.cookie('f_cb_c_e',1, { path: '/products', secure: true});
+        }
+        if($('#filter_checked_by_c_a').is(":checked")){
+            $.cookie('f_cb_c_a',1, { path: '/products', secure: true});
+        }
+
+        //sort state and search value
+        $.cookie('sort_by',$('#select_sort').val(), { path: '/products', secure: true});
+        $.cookie('search_value',$('#name_search_value'), { path: '/products', secure: true});
+
+} // eo function save_kats()
+
+function set_cookies_null(){
+//after page initialisation - set all cookies to 0
+$.cookie('sub_kat_lvl1', 0, { path: '/products', secure: true});
+$.cookie('sub_kat_lvl2', 0, { path: '/products', secure: true});
+$.cookie('sub_kat_lvl3', 0, { path: '/products', secure: true});
+
+//filters
+$.cookie('f_s_c_f',0, { path: '/products', secure: true});
+$.cookie('f_s_c_r',0, { path: '/products', secure: true});
+$.cookie('f_s_c_u',0, { path: '/products', secure: true});
+
+$.cookie('f_cb_c_n',0, { path: '/products', secure: true});
+$.cookie('f_cb_c_e',0, { path: '/products', secure: true});
+$.cookie('f_cb_c_p',0, { path: '/products', secure: true});
+$.cookie('f_cb_c_a',0, { path: '/products', secure: true});
+
+//sortier status
+$.cookie('sort_by',0, { path: '/products', secure: true});
+$.cookie('search_value',0, { path: '/products', secure: true});
+}
+
+
+</script>
+
+{%endblock%}

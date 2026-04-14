@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<!-- finished Orders -------------------------------------------------------------------------------------------------->
+
+<div class="container-fluid bg-white border border-secondary mt-3" id="finished_orders">
+    <div class="d-flex flex-row mt-3 mb-3 justify-content-between">
+
+        <div class="col ms-2 align-self-start" >
+           <form method="get">
+            <div class="input-group ">
+                <div class="form-outline">
+                  <input type="search" name="name" class="form-control " {%if last_name is not none%} value="{{last_name}}" {%endif%} placeholder="Kundenname" />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="feather-16 text-white" data-feather="search"></i>
+                </button>
+            </div>
+        </form>
+        </div>
+
+        <div class="col ms-2 align-self-start" >
+           <form method="get">
+            <div class="input-group ">
+                <div class="form-outline">
+                  <input type="search" name="id" class="form-control " {%if last_id is not none%} value="{{last_id}}" {%endif%} placeholder="Auftragsnr." />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="feather-16 text-white" data-feather="search"></i>
+                </button>
+            </div>
+        </form>
+        </div>
+
+
+        <div class="d-flex flex-column d-flex h3 me-5 text-center ">Abgeschlossene Aufträge</div>
+
+        <div class="flex-column justify-content-end" >
+            <form action="{{url_for('repair_bp.repair_orders')}}">
+            <button class="btn btn-primary text-white" type="submit" > <i class="feather-16" data-feather="arrow-left"></i> </button>
+            </form>
+        </div>
+
+    </div>
+
+    {%if last_name or id %}
+    <div class="row ms-2 align-self-start" >
+
+        <form action="{{url_for('repair_bp.repair_orders_finished')}}">
+            <button type="submit" class="btn btn-primary">
+                  alle anzeigen
+            </button>
+        </form>
+
+    </div>
+    {%endif%}
+
+    <div class="d-flex flex-row mb-3 justify-content-between align-items-center">
+
+        <div class="col ms-3 float-start">
+            {% if pagination_finished is defined %} {{ pagination_finished.info | safe }} {%endif%}
+        </div>
+
+    </div>
+<div class="container-fluid w-100">
+
+   <div class="row">
+      <div class="col me-3"><b>Auftrag-ID:Verkauf-ID</b></div> <!-- ID index0:0 + Status index0:1 -->
+      <div class="col me-3"><b>aufgegeben:Kunde </b></div>
+      <div class="col me-3"><b>abgeschlossen</b></div>
+       <!-- KundeID -> index0: 3 -->
+      <div class="col me-3"><b>Beschreibung</b></div>
+      <!--GeräteID -> index0: 5 -->
+      <div class="col me-3"><b>Gerät</b></div>  <!-- index0:5 -->
+      <!-- ServiceID -> index0: 7 -->
+      <div class="col me-3"><b>Service</b></div>
+      <!-- ReparaturID -> index0: 9 -->
+      <div class="col me-3"><b>Reparatur</b></div>
+   </div>
+
+   {% for repair_order in finished_orders_list %}
+
+   <div class="row pb-2 d-flex pt-2 {% if loop.index0 != 4 %} border-bottom border-5 border-dark {%endif%} align-items-center">
+
+   {% for key, value in repair_order.items() %}
+      {% if loop.index0 == 0 %}
+
+       <div class="col border-right border-dark border-end " style="height:85px;">
+                        <span>
+                        <b>{{repair_order.AuftragID}}: </b>
+                            {{repair_order.status_sale_id}} </span>
+         </div>
+
+
+      {%else%}
+
+        {%if loop.index0 == 2 %} <!-- aufgegeben xd -->
+        <div class="col border-right border-dark border-end " style="height:85px;">
+            {{repair_order.AuftragDatum}}<br>
+            {{repair_order.Kunde}}
+            <button class="btn btn-sm ms-3 btn-outline-dark border border-none" value="{{repair_order.KundeID}}" onclick="open_show_customer_details(this.value);" type="button"><i class="feather-16" data-feather="zoom-in"></i></button>
+
+        </div>
+        {%else%}
+
+         {% if loop.index0 != 2 and loop.index0 != 3 and loop.index0 != 5 and loop.index0 !=7 and loop.index0 != 9 and loop.index0 != 11 and loop.index0 != 0 and loop.index0 != 1 and loop.index0 !=13 and loop.index0 !=14 %} <!-- KundenID, ItemID, ServiceID, ReparaturID not displayed -->
+
+         <div class="col d-flex {%if loop.index0 != 12 %} border-end border-dark {%endif%} align-items-baseline" style="height:85px;">
+
+                  <!-- display item TOP -->
+                  {% if loop.index0 == 8 %}  <!-- device_name -->
+
+                     {% if repair_order["ItemID"] %}
+                        <form action="{{ url_for('inventory_bp.product_details', idd=repair_order["ItemID"]) }}">
+                           <button class="btn btn-outline-dark border border-none ">
+                     {%endif%}
+
+                  {%endif%}
+
+                 <!-- display repair TOP -->
+                  {% if loop.index0 == 12 and repair_order.ItemID != '-' and repair_order.ItemID %} <!-- Repair -->
+                        {%if value == '-' %}
+                            -
+                        {%else %}
+                       <div class="container" >
+                        <div class="row mb-3" >
+                            <div class="col">
+                                <form action="{{ url_for('repair_bp.repair_details', r_id=repair_order.ReparaturID) }}">
+                                <button class="btn btn-outline-dark border border-none" type="submit">
+                        {%endif%}
+                  {% endif %}
+
+            {% if value and value != '-' %} {{value}} {% else%} &nbsp; {%endif%}
+
+                    {% if loop.index0 == 6 %}
+                        {%if value== '' or value is none%}
+                         -
+                        {%else %}
+                         <button class="btn btn-sm ms-3 btn-outline-dark border border-none" type="button" data-bs-toggle="modal" data-bs-target="#show_order_description{{repair_order.AuftragID}}"><i class="feather-16" data-feather="zoom-in"></i></button>
+                         {%endif%}
+                     {% endif %}
+                  {% if loop.index0 == 10 and value != '-' %} <!-- Service -->
+                              <button class="btn btn-sm ms-3 btn-outline-dark border border-none" value="{{repair_order.ServiceID}}" onclick="open_show_service_details(this.value);" type="button"><i class="feather-16" data-feather="zoom-in"></i></button>
+                  {% endif %}
+
+
+                  <!-- display item BOTTOM -->
+                  {% if loop.index0 == 8 %}
+                     {% if repair_order["ItemID"] %}
+                                </button>
+                            </form>
+
+                     {%else%}
+                        <p style="color:red;">Item got removed from Inventory!</p>
+                     {%endif%}
+                  {%endif%}
+
+                    <!-- display repair BOTTOM -->
+                 {% if loop.index0 == 12 and repair_order.ItemID != '-' and repair_order.ItemID and value != '-' %} <!-- Repair -->
+                            </button>
+                        </form>
+                       </div> <!-- eo col -->
+                       </div> <!-- eo row -->
+
+                        <div class="row">
+                            <div class="col">
+                                <button class="btn btn-white" type="button" data-bs-toggle="modal" data-bs-target="#change_repair_price{{repair_order.ReparaturID}}" >{{repair_order.ReparaturPreis}} € </button>
+                            </div>
+                        </div>
+                    </div> <!-- eo container -->
+
+                 {%endif%}
+
+         </div>
+
+         {% endif %}
+      {%endif%}
+    {%endif%}
+
+
+
+   {% endfor %}
+       <div class="container-fluid" style="float:right;right:0;width:10px;">
+
+
+           <!-- Modal full order description -->
+            <div class="modal fade" id="show_order_description{{repair_order.AuftragID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Auftragsbeschreibung</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      {{repair_order.full_description}}
+                      </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+
+
+        </div>
+
+
+
+{% endfor %}
+    <div class="d-flex mt-3 float-start">  {% if pagination_finished is defined %} {{ pagination_finished.links }} {%endif%} </div>
+    </div>
+
+<!-- Modals ----------------------------------------------------------------------------------------------------------->
+
+<div id="display_customer_details" class="modal" tabindex="-1" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Service Details</h5>
+                <button type="button" class="btn-close" onclick="hide_customer_details();" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+
+           <div class="modal-body" id="customer_details">
+
+
+           </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="display_service_details" class="modal" tabindex="-1" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Service Details</h5>
+                <button type="button" class="btn-close" onclick="hide_service_details();" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+
+
+           <div class="modal-body" id="service_details">
+
+
+           </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+function open_show_service_details(s_id){
+
+        $.ajax({
+					url: "{{ url_for( 'service_bp.ajax_get_service_details' ) }}",
+					type: "GET",
+					data: {'service_id': s_id, 'order_id':'-'},
+					success: function(resp){
+                            if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen der Service Details vom Server (ajax_get_service_details)");
+                                return;
+					        }
+
+					        if(resp=='empty'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Service nicht gefunden (ajax_get_service_details)");
+                                return;
+					        }
+					            //show modal
+					            $('#display_service_details').show();
+
+							var html_str= '<table class="product_details">';
+
+                            for (const [key, value] of Object.entries(resp)) {
+
+                                html_str+="<tr><td><b>"+key+"</b></td> <td>"+value+"</td> </tr>";
+
+                            }
+
+                            html_str+="</table>";
+
+						$('#service_details').html(html_str);
+		  			}
+	});
+
+}
+
+function hide_customer_details(){
+    $('#display_customer_details').hide();
+
+}
+
+function hide_service_details(){
+    $('#display_service_details').hide();
+}
+
+    function open_show_customer_details(k_id){
+
+        $.ajax({
+					url: "{{ url_for( 'customer_bp.ajax_get_customer_details' ) }}",
+					type: "GET",
+					data: {k: k_id},
+					success: function(resp){
+                            if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim holen vorhandener 'Kunden' Einträge vom Server (ajax_get_customer_details)");
+                                return;
+					        }
+
+					        if(resp=='empty'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Der Kunden-Eintrag existiert nicht. (ajax_get_customer_details)");
+                                return;
+					        }
+					            //show modal
+					            $('#display_customer_details').show();
+
+							var html_str= '<table class="product_details">';
+                            console.log(resp);
+                            for (const [key, value] of Object.entries(resp)) {
+
+                                html_str+="<tr><td><b>"+key+"</b></td> <td>"+value+"</td> </tr>";
+                                console.log(key,value);
+                            }
+
+                            html_str+="</table>";
+
+						$('#customer_details').html(html_str);
+		  			}
+	});
+
+
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container bg-white border border-secondary m-3">
+            <button type="button" class="btn btn-light float-end" data-bs-toggle="modal" data-bs-target="#show_info_legend">
+                <i class="feather-24" data-feather="help-circle"></i>
+            </button>
+        <div id="current_email">
+
+            {% for para in mail_content_split %}
+                <p>{{para}}</p>
+            {% endfor %}
+
+        <!-- edit button -->
+        <button class="btn-primary" type="button" onclick="show_edit_email();">
+            <i class="feather-16" data-feather="edit"></i>
+        </button>
+        </div>
+
+    <div id="edit_email" style="display:none;">
+        <form method="POST">
+            <textarea class="form-control" style="min-width: 100%" name="new_mail_content" rows="10">{{mail_content}}</textarea>
+            <button class="btn-primary" type="submit"><i class="feather-16" data-feather="check-circle"></i></button>
+        </form>
+    </div>
+
+
+</div>
+<!-- Modal Availiability Info -->
+<div class="modal fade" id="show_info_legend" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Automatisch Ersetzt wird: </p>
+            <ul>
+                <li> {kundenname} = Name des Kunden</li>
+            </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+
+function show_edit_email(){
+    $('#edit_email').show();
+    $('#current_email').hide();
+}
+
+</script>
+{%endblock%}

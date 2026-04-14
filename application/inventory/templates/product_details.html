@@ -1,0 +1,533 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<input type="hidden" id="i_id" value="{{item_details.ID}}">
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col">
+            <div class="d-flex flex-column bg-light  p-5 m-5 pt-0" >
+
+                <div class="d-flex flex-row mb-1 mt-3 justify-content-end align-items-baseline">
+                             <button type="button" class="btn btn-light float-end" data-bs-toggle="modal" data-bs-target="#show_info_availability">
+                                     <i class="feather-24" data-feather="help-circle"></i>
+                             </button>
+                </div>
+
+                <div class="d-flex flex-row align-items-baseline">
+                        <h4>Verfügbarkeit:</h4>
+                        {% if availability.available == false %}
+                            <p class=" ms-5 me-5 float-start h4 text-danger"> {{availability.reason}} <i class="text-danger feather-24" data-feather="x-circle"></i> </p>
+
+                            {% if availability.reason_id == "sold" %}
+                                <p> ( am {{availability.date}} - <b>Verkauf-ID: {{availability.ID}} </b> )
+                            {%endif%}
+
+                            {% if availability.reason_id == "online" %}
+                                <p> ( <b>Upload-ID: {{availability.ID}} </b> )
+                            {%endif%}
+
+                            {% if availability.reason_id == "order" %}
+                               <p> ( aufgegeben am: {{availability.date}}, Kundenname: {{availability.customer}} - <b>Auftrags-ID:
+                                <form action="{{ url_for('repair_bp.repair_orders_i', o_id=availability.ID) }}">
+                                    <button class="btn btn-outline-dark border border-none "> {{availability.ID}} </button>
+                                </form> </b> )
+                            {% endif %}
+
+                            {% if availability.reason_id == "spare_part" %}
+                                <form action="{{ url_for('repair_bp.repair_details', r_id=availability.ID) }}"><button type="submit" class="btn btn-outline-dark"> -> Reparatur anzeigen </button> </form>
+                            {%endif%}
+                        {%else%}
+                            <p class="text-success ms-5"> verfügbar <i class="text-success feather-24" data-feather="check-circle"></i> </p>
+                        {%endif%}
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+                <!-- Item Details -->
+                 <div class="d-flex flex-shrink bg-white justify-content-start p-5 m-5">
+                        <div class="flex-column justify-content-start">
+                                <h4> Item-Details: </h4>
+
+
+                                         <table class="product_details">
+                                             {% for key, value in item_details.items() %}
+                                                  {%if key=='edited_by' or key =='Zuletzt Geupdated am' or key=='Anzahl' or key=='Preis'%}
+                                                        {% if key == 'edited_by' %}
+                                                            {%if value%}
+                                                                <tr><td><b>Zuletzt bearbeitet von:</b></td> <td>{{value.username}}</td> </tr>
+                                                            {%endif%}
+                                                        {%endif%}
+                                                        {%if key=='Anzahl'%}
+                                                            {% if not availability.reason_id=="order"%}
+                                                                {% if availability.reason_id=="sold"%}
+                                                                    <tr><td><b>{{key}}:</b></td> <td>{{value}}
+                                                                {%else%}
+                                                                    <tr><td><b>{{key}}:</b></td> <td><input style="style=font-size:2048px;width:50%" id="item_amount" type="number" min="1" oninput="ajax_change_item_amount();" onchange="ajax_change_item_amount();" value="{{value}}"></td> </tr>
+                                                                {%endif%}
+                                                        {%endif%}
+                                                        {%endif%}
+                                                        {%if key=='Preis'%}
+                                                            {% if not availability.reason_id=="order"%}
+                                                            <tr><td><b>{{key}}:</b></td> <td><span id="single_price">{%if value==0%}0,00 €{%else%}{{(value|string)[:-2]}},{{(value|string)[-2:]}} €{%endif%}</span> <br> <span id="total_price"></span></td> </tr>
+                                                            {%endif%}
+                                                        {%endif%}
+                                                         {% if key == 'Zuletzt Geupdated am' %}
+                                                            {%if value%}
+                                                                <tr><td><b>Zuletzt bearbeitet am:</b></td> <td>{{value}}</td> </tr>
+                                                            {%endif%}
+                                                        {%endif%}
+                                                  {%else%}
+                                                    <tr><td><b>{{key}}:</b></td> <td>{{value}}</td> </tr>
+                                                  {%endif%}
+                                             {% endfor %}
+                                         </table>
+
+                                            <div class="row">
+                                                <div class="col">
+                                                    {% if availability.reason_id != "sold" %}
+                                                        {% if availability.reason_id == "order" %}
+                                                        <form action="{{ url_for('inventory_bp.product_edit', idd=item_details.ID, order=1) }}">
+                                                        {%else%}
+                                                            <form action="{{ url_for('inventory_bp.product_edit', idd=item_details.ID, order=0) }}">
+                                                        {%endif%}
+                                                          <button type="submit" value="edit" class="float-end btn btn-primary">
+                                                              <i class="feather-16" data-feather="edit"></i>
+                                                          </button>
+                                                        </form>
+                                                    {%endif%}
+                                                </div>
+
+                                                <div class="col ">
+                                                        {%if availability.available==true %}
+
+                                                            {% if repair_info is none or repair_info.state == "abgeschlossen" %}
+                                                                <button type="button" class="btn btn-success me-2" value="{{item_details.ID}}" data-bs-toggle="modal" data-bs-target="#sell_single_item{{item_details.ID}}">
+                                                                    <i class="feather-16" data-feather="shopping-bag"></i>
+                                                                </button>
+
+                                                                <!-- Modal SELL-->
+                                                                <div class="modal fade" id="sell_single_item{{item_details.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                      <div class="modal-header">
+                                                                        <h5 class="modal-title">Verkauf abschließen</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                      </div>
+                                                                        <form method="POST">
+                                                                      <div class="modal-body">
+
+							                                              <div class="row mt-3">
+							                                                   <div class="col-lg-1 col-md-1"></div>
+							                                                   <div class="col-lg-5 col-md-5 h6">Preis (€): </div>
+							                                                   <div class="col-lg-5 col-md-5">
+                                                                                   <input class="form-control" name="price" type="text" pattern="[0-9]{'{1,4}'},[0-9]{'{2}'}" placeholder="10,00" required>
+                                                                               </div>
+							                                                   <div class="col-lg-1 col-md-1"></div>
+							                                              </div>
+
+                                                                          <div class="row mt-3">
+							                                                   <div class="col-lg-1 col-md-1"></div>
+							                                                   <div class="col-lg-5 col-md-5 h6">Kommentar</div>
+							                                                   <div class="col-lg-5 col-md-5">
+							                                                    <textarea class="form-control border border-dark" name="description" rows="3"></textarea>
+							                                                   </div>
+							                                                   <div class="col-lg-1 col-md-1"></div>
+							                                              </div>
+
+                                                                             <input type="hidden" name="item_id" value="{{item_details.ID}}" >
+                                                                      </div>
+                                                                      <div class="modal-footer justify-content-center">
+                                                                        <button type="submit" name="sell_single_item" class="btn btn-primary">Verkauf abschließen</button>
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                                                                      </div>
+                                                                      </form>
+                                                                    </div>
+                                                                  </div>
+                                                                </div>
+
+                                                                <button type="button" onclick="open_upload_item(this.value);" class="btn btn-success me-2" value="{{item_details.ID}}">
+                                                                    <i class="feather-16" data-feather="upload"></i>
+                                                                </button>
+
+                                                            {%endif%}
+
+
+                                                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_inv_element{{item_details.ID}}" >
+                                                                   <i class="feather-16" data-feather="trash-2"></i>
+                                                                </button>
+
+                                                            <!-- Modal DELETE-->
+                                                            <div class="modal fade" id="delete_inv_element{{item_details.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                                              <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                  <div class="modal-header">
+                                                                    <h5 class="modal-title" >Sicherheitsabfrage</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                  </div>
+                                                                  <div class="modal-body">
+                                                                    Soll das Item {{item_details.ID}} wirklich gelöscht werden?
+                                                                  </div>
+                                                                  <div class="modal-footer">
+                                                                    <form method="POST">
+                                                                        <button type="submit" name="delete_inv_element" value="{{item_details.ID}}" class="btn btn-danger">Ja</button>
+                                                                    </form>
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nein</button>
+                                                                  </div>
+                                                                </div>
+                                                              </div>
+                                                            </div>
+
+                                                        {%endif%}
+                                                </div>
+                                            </div>
+
+                        </div>
+                </div>
+
+        </div> <!-- eo col -->
+        <div class="col-lg-6">
+
+                <!-- Lager Details -->
+                <div class="d-flex bg-light justify-content-between p-5 m-5" >
+
+                       <div class="flex-column w-100">
+                            <div class="row">
+                                <div class="col">
+                                    <h4 class="float-start"> Lager: </h4>
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="float-end btn btn-dark " data-bs-toggle="modal" data-bs-target="#qr_code">
+                                         <i data-feather="codesandbox"><a class="dropdown-item" href=""></a></i>
+                                    </button>
+                                </div>
+                            </div>
+                           {% if lager%}
+                           <table class="product_details">
+
+                                    {% for key, value in lager.items() %}
+                                    <tr><td><b>{{key}}:</b></td> <td>{{value}}</td> </tr>
+                                    {% endfor %}
+                           </table>
+                           {% else %}
+                           <p>Keine Zuweisung zu Kisten-ID.</p>
+                            {%endif%}
+
+                       </div>
+                 </div>
+
+
+                <!-- active repairs should always be available -->
+                <!-- if there is no active repair -> repair entry field is only available, when item.state == "reparierbar" -->
+                {% if item_details["Status"] == "reparierbar" or repair_info %}
+                <div class="d-flex bg-light justify-content-left p-5 m-5">
+
+                    <div class="flex-column w-100">
+                        <h4>Reparatur: </h4>
+
+                        {% if repair_info is none %}
+                            <p> Kein Reparatur Eintrag vorhanden.</p>
+                                {% if availability.reason_id != "sold" %}
+                        <form action="{{ url_for('repair_bp.repair_entry', idd=item_details.ID) }}"><button type="submit" class="btn btn-primary"> <i class="feather-16" data-feather="plus"></i> </button> </form>
+                                {%endif%}
+                        <br>
+                        {% else %}
+                            <p><b>Status: </b>{{repair_info.state}}</p>
+                            <form action="{{ url_for('repair_bp.repair_details', r_id=repair_info.ID) }}"><button type="submit" class="btn btn-primary"> Reparatur Details </button> </form>
+
+                        {%endif%}
+                    </div>
+                </div>
+
+
+        </div> <!-- eo column -->
+    </div> <!-- eo row -->
+
+
+
+
+
+</div> <!-- eo container -->
+
+{% endif %}
+
+<!-- Modal QR Code-->
+<div class="modal fade" id="qr_code" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="staticBackdropLabel">QR-Code</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center" id="qr_image_parent">
+                <img id="qr_image" src="{{ qr_img }}">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="print_qr_code();" ><i class="feather-16" data-feather="printer"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Availiability Info -->
+<div class="modal fade" id="show_info_availability" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Items, werden als nicht verfügbar angezeigt, wenn sie: </p>
+            <ul>
+                <li> bereits verkauft worden sind</li>
+                <li> einem Upload hinzugefügt worden sind</li>
+                <li> Teil eines Auftrages sind</li>
+                <li> als Ersatzteil in einer Reparatur verwendet werden </li>
+            </ul>
+        <br>
+        <p> Nur verfügbare Items können gelöscht werden.</p>
+        <p> Items, die einen Reparatur Eintrag haben, welcher Ersatzteile im Inventar beinhaltet, können ebenfalls nicht gelöscht werden.
+            (Hierfür müssen die Ersatzteile vorerst - über die Reparatur-Ansicht - entfernt werden.)  </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- overlay upload item -->
+<div id="display_upload_item" class="overlay">
+    <div class="overlay-content">
+        <button class="btn btn-danger" onclick="close_upload_item();"> <i class="feather-24" data-feather="x"></i></button>
+
+        <fieldset class="add_customer">
+        <div class="container-fluid">
+            <div class="row mt-3 mb-3">
+                <div class="col-lg-4">
+                    <button  class="btn btn-primary" onclick="open_add_upload();"> <i class="feather-16" data-feather="plus-circle"></i>  Neuer Upload </button>
+                </div>
+                <div class="col-lg-8"></div>
+            </div>
+
+            <div class="row mb-3">
+
+                <div class=" col-lg-6">
+                    <div class="input-group">
+                    <div class="form-outline">
+                        <input type="search" id="upload_search_by_id" class="form-control" placeholder="ID" >
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="ajax_upload_id_search();">
+                        <i class="feather-24" data-feather="arrow-right"></i>
+                    </button>
+                    </div>
+                </div>
+
+                <div class=" col-lg-6">
+                    <div class="input-group">
+                    <div class="form-outline">
+                      <input type="search" id="upload_search_by_name" placeholder="Bezeichnung" class="form-control" oninput="ajax_upload_name_search(this.value);" onkeydown="ajax_upload_name_search(this.value);">
+                    </div>
+                    <span class="input-group-text border-0" >
+                      <i  class="feather-24" data-feather="search"></i>
+                    </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="container-fluid" id="upload_results">
+
+
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<!-- overlay add upload -->
+<div id="display_add_upload" class="overlay">
+    <div class="overlay-content">
+        <button class="btn btn-primary" onclick="close_add_upload();"> <i class="feather-24" data-feather="arrow-left"></i></button>
+
+        <fieldset class="add_customer">
+                   <div class="container-fluid">
+        <form method="POST">
+                <div class="row mt-3 mb-3">
+                    <div class="col-lg-3 h6 text-end">
+                       Bezeichnung:
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="new_upload_name" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3 h6 text-end">
+                        Preis:
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="new_upload_price" type="text" pattern="[0-9]{'{1,4}'},[0-9]{'{2}'}" placeholder="10,00" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3 h6 text-end">
+                       Beschreibung:
+                    </div>
+                    <div class="col-lg-9">
+                        <textarea class="form-control border border-dark" name="new_upload_description" rows="5"></textarea>
+
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-lg-3"> </div>
+                    <div class="col-lg-9"> <button type="submit" name="add_upload" class="btn btn-primary">Hinzufügen</button></div>
+                </div>
+            <input type="hidden" name="item_id" id="add_upload_item_id" value="">
+            </form>
+            </div>
+
+        </fieldset>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="{{url_for('static',filename='js/print.js')}}"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    single_price=$('#single_price').html();
+    amount=$('#item_amount').val();
+    set_total_price(single_price, amount);
+}); //eo document ready
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+     function print_qr_code() {
+        image = $('#qr_image').prop('src');
+        item_id= 'ID: '
+        item_id+=$('#i_id').val();
+        printJS({ printable: 'qr_image_parent', type: 'html', header: item_id })
+    }
+
+    function open_upload_item(i_id){
+        $("#display_upload_item").css("width","100%");
+        $("#add_upload_item_id").val(i_id);
+        ajax_upload_name_search('');
+    }
+
+    function close_upload_item() {
+        $("#display_upload_item").css("width","0%");
+    }
+
+const open_add_upload=async() => {
+    $("#display_upload_item").css("width", "0%");
+    await delay(500);
+    $("#display_add_upload").css("width","100%");
+}
+
+const close_add_upload=async() => {
+    $("#display_add_upload").css("width","0%");
+    await delay(500);
+    $("#display_upload_item").css("width", "100%");
+}
+
+function set_total_price(single_price, amount){
+
+    if(typeof(single_price)=="undefined"){
+	     return;         //single price is undefined (0)
+	}
+	single_price=single_price.replace(',','')
+	single_price=single_price.replace('€','')
+
+	//gesamtpreis errechnen:
+    single_price_int=parseInt(single_price)
+    total_price_int=single_price_int*amount;
+
+	//gesamtpreis ersetzen:
+    total_price=total_price_int.toString();
+    total_price_first=total_price.slice(0,-2);
+    total_price_last=total_price.slice(-2);
+    total_price=total_price_first+','+total_price_last+' €';
+    $('#total_price').html('('+total_price+')');
+}
+//change of amount
+
+const ajax_change_item_amount=async() =>{
+    await delay(500);
+    amount=$('#item_amount').val();
+    if(amount<1){
+        return;
+    }
+    $.ajax({
+    					url: "{{ url_for( 'inventory_bp.change_item_amount_ajax' ) }}",
+    					type: "GET",
+    					data: {'item_id':$('#i_id').val(), 'amount':amount},
+    					success: function(resp){
+
+    					    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim Ändern der Item-Anzahl (change_item_amount_ajax)");
+                                return;
+					        }
+
+					        //change value of total price:
+					        single_price=$('#single_price').html();
+					        set_total_price(single_price, amount);
+					    }
+    });
+}
+
+
+function ajax_upload_name_search(val){
+
+
+$.ajax({
+    					url: "{{ url_for( 'upload_bp.upload_name_search_ajax' ) }}",
+    					type: "GET",
+    					data: {'search_val':val },
+    					success: function(resp){
+
+    					    if(resp=='error'){
+					            $('#ajax_flash_danger').show();
+					            $('#ajax_flash_danger_msg').html("Fehler beim Laden der Uploads (ajax_upload_name_search)");
+                                return;
+					        }
+
+
+                            if(resp=="empty"){
+                                html_str="<p> Kein passender Upload gefunden. </p>";
+                            }else{
+                                    html_str="";
+        			            for(const element of resp){
+        			                html_str+=`<div class="row mb-3"> <div class="col">`;
+        			                html_str+=`<form method="POST"> <input type="hidden" name="upload_id" value=`;
+                                    html_str+=element["id"]+">";
+                                    html_str += `<input type="hidden" name="upload_item_id" value=`;
+                                    html_str+= $('#add_upload_item_id').val() +">";
+                                    html_str+="<button type=\"submit\" class=\"btn btn-outline-dark w-75 text-start\">";
+                                    html_str+="<p><b>"+element["id"] +"</b>: ";
+                                    html_str+=element["name"] +"</p>";
+                                    html_str+="</button> </form></div> </div>";
+        		                }// eo for
+
+        		            }//eo else
+                            $('#upload_results').html(html_str);
+    						feather.replace();
+    		  			}
+    	});
+
+}
+
+</script>
+
+{%endblock%}

@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="d-flex flex-column bg-white border border-secondary m-3">
+
+<div class="container-fluid m-3">
+
+<div class="row mb-3">
+    <div class="col-lg-2">
+        <button  class="btn btn-primary" onclick="open_add_customer();"> <i class="feather-16" data-feather="plus-circle"></i>  Neu </button>
+    </div>
+    <div class="col-lg-10"></div>
+</div>
+
+    <div class="row">
+        <div class="col-lg-6 text-start">
+        {% if pagination is defined and pagination.links != '' %} {{ pagination.info | safe }} {%endif%}
+        </div>
+
+        <div class="col">
+        {%if last_name is not none%}
+        <form action="{{ url_for('customer_bp.customers')}}">
+            <button type="submit" class="btn btn-primary">alle anzeigen</button>
+        </form>
+        {%endif%}
+        </div>
+
+        <div class="col-lg-3">
+        <form method="get">
+        <div class="input-group ">
+            <div class="form-outline">
+              <input type="search" name="name" class="form-control " {%if last_name is not none%} value="{{last_name}}" {%endif%} placeholder="Name" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="feather-16 text-white" data-feather="search"></i>
+            </button>
+        </div>
+        </form>
+        </div>
+
+    </div>
+</div>
+
+    <fieldset class="content ms-3" >
+        <legend> Kunden-Übersicht </legend>
+
+    <div class="container-fluid ms-3 pt-3">
+
+        {% if customers is defined %}
+        {% for row in customers %}
+
+            <div class="row d-flex align-items-center mt-3 pb-3">
+
+                <div class="col-lg-1 small">{% if pagination is defined %} {{loop.index + pagination.skip}} {%endif%}</div>
+
+            {% for cell in row %}
+
+                {% if loop.index0 != 0 and loop.index0 != 1 %}
+                    <div class="col {% if loop.index0 == 2 %} h6 {%endif%}">
+
+                    {% if loop.index0 == 5 %}
+                        {% set str_list = cell.split('\n') %}
+                            {% for c in str_list %}
+                                {{ c }} <br>
+                            {%endfor%}
+                    {% else %}
+                        {{ cell }}
+                    {%endif %}
+
+                    </div>
+                {% endif %}
+
+            {% endfor %}
+
+                <div class="col d-inline align-self-center justify-content-between" >
+
+                    <form class="d-inline" action="{{ url_for('customer_bp.customer_edit', c_id=row[1]) }}">
+                        <button class="btn btn-primary" type="submit" value="edit">
+                            <i class="feather-16" data-feather="edit"></i>
+                        </button>
+                    </form>
+
+                    {% if row[0] == "no" %}
+
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_customer{{row[1]}}">
+                            <i class="feather-16" data-feather="trash-2"></i>
+                        </button>
+
+
+                    <!-- Modal delete customer -->
+                    <div class="modal fade" id="delete_customer{{row[1]}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel">Sicherheitsabfrage</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            Soll der Kunde (ID: {{row[1]}}) wirklich gelöscht werden?
+                          </div>
+                          <div class="modal-footer">
+                            <form class="d-inline me-3" method="POST" name="del_customer">
+                                <button class="btn btn-danger " name="delete_button" value={{row[1]}} type="submit"> Ja
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nein</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+        {%endfor%}
+        <div class="d-flex mt-3 float-start">  {% if pagination is defined %} {{ pagination.links }} {%endif%} </div>
+        {%endif%}
+        </div>
+    </fieldset>
+</div>
+
+<div id="display_add_customer" class="overlay">
+    <div class="overlay-content">
+        <button class="btn btn-danger" onclick="close_add_customer();"> <i class="feather-24" data-feather="x"></i></button>
+
+        <fieldset class="add_customer">
+ <br>
+
+            <div class="container-fluid">
+        <form method="POST">
+                <div class="row">
+                    <div class="col-lg-3 h5 text-end">
+                       Name:
+                    </div>
+                    <div class="col-lg-6">
+                        <input class="form-control border border-dark" name="new_customer_prename" placeholder="Vorname(n)" required>
+                    </div>
+                    <div class="col-lg-3"></div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h5 text-end"></div>
+                    <div class="col-lg-6">
+                        <input class="form-control border border-dark" name="new_customer_surname" placeholder="Nachname" required>
+                    </div>
+                    <div class="col-lg-3"></div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h5 text-end">
+                       E-Mail:
+                    </div>
+                    <div class="col-lg-6">
+                        <input class="form-control border border-dark" name="new_customer_email" placeholder="example@tux.com">
+                    </div>
+                    <div class="col-lg-3"></div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h5 text-end">
+                       Telefon:
+                    </div>
+                    <div class="col-lg-6">
+                       <input class="form-control border border-dark" name="new_customer_phone_number" placeholder="112">
+                    </div>
+                    <div class="col-lg-3"></div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h5 text-end">
+                       Adresse:
+                    </div>
+                    <div class="col-lg-6">
+                        <textarea class="form-control border border-dark" name="new_customer_address" placeholder="Adresse" rows="3"></textarea>
+                    </div>
+                    <div class="col-lg-3"></div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3"> </div>
+                    <div class="col-lg-6"> <button type="submit" class="btn btn-primary">Hinzufügen</button></div>
+                    <div class="col-lg-3"></div>
+                </div>
+            <input type="hidden" name="add_customer" value="1">
+            </form>
+            </div>
+<br>
+</fieldset>
+</div>
+
+</div>
+
+<script>
+
+function open_add_customer(){
+    $("#display_add_customer").css("width","100%");
+}
+
+function close_add_customer() {
+    $("#display_add_customer").css("width","0%");
+}
+
+
+</script>
+{% endblock %}

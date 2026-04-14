@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container-fluid bg-white w-50 p-5 m-5">
+    <div class="row mb-5">
+        <div class="col-lg-2 h4">
+            Kunde:
+        </div>
+
+        <div class="col-lg-3">
+            {% for c in customer %}
+                {{c}},
+            {% endfor %}
+
+        </div>
+
+        <div class="col-lg-3 text-start">
+             <button class="btn btn-secondary" onclick="open_display_customers();"> ändern </button>
+        </div>
+        <div class="col-lg-4"></div>
+
+    </div>
+
+    <div class="row border-bottom border-secondary pb-3 ">
+        <div class="col-lg-2 h4">
+            Gerät:
+        </div>
+        <div class="col-lg-3">
+            <form action="{{ url_for('inventory_bp.input_values_external')}}">  <button class="btn btn-primary"> Gerät hinzufügen </button> </form>
+        </div>
+
+        <div class="col-lg-7"></div>
+       <!-- <div class="col-lg-1">
+            ODER
+        </div>
+        <div class="col-lg-3">
+            <button onclick="openNav();"> Bereits vorhandenes Gerät </button>
+        </div>
+        <div class="col-lg-5">
+            auswählen
+        </div> -->
+    </div>
+<br>
+    <div class="row">
+        <div class="col-lg-9"> </div>
+        <div class="col-lg-2">
+            <form method="post">
+            <button type="submit" name="abort" class="btn btn-danger">
+                Abbrechen
+            </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<div id="display_customers" class="overlay">
+
+    <div class="overlay-content">
+        <button class="btn btn-danger" onclick="close_display_customers();"> <i class="feather-24" data-feather="x"></i></button>
+        <div class="container-fluid">
+
+            <div class="row mb-3">
+                <div class="col-lg-4 ms-2">
+                     <div class="input-group rounded w-50 mt-2">
+                            <input type="search" class="form-control rounded" id="search_value" oninput="ajax_search(this.value);" onkeydown="ajax_search(this.value);" placeholder="Suche.." aria-label="Search" aria-describedby="search-addon" />
+                            <span class="input-group-text border-0 bg-primary text-white" id="search-addon">
+                              <i  class="feather-16" data-feather="search"></i>
+                            </span>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                     <button  class="btn btn-primary" onclick="open_add_customer();"> <i class="feather-16" data-feather="plus-circle"></i>  Kunde hinzufügen </button>
+                </div>
+                <div class="col-lg-6">
+
+                 </div>
+            </div>
+
+
+        </div>
+
+
+        <div id="all_values" class="container-fluid">
+        {% for row in all_customers %}
+            <div class="row">
+                <div class="col-lg-6">
+                    <form method="POST"> <input type="hidden" name="customer_id" value="{{row[0]}}">
+                    <button class="contactbtn">
+                    <i  class="feather-24" data-feather="user"></i>
+                        <div>
+                        {% for cell in row %}
+                            <p> {{cell}} </p>
+                        {% endfor %}
+                        </div>
+                    </button>
+                    </form>
+                </div>
+                <div class="col-lg-6"></div>
+            </div>
+        {%endfor%}
+
+        </div> <!-- eo container -->
+
+        <div id="ajax_resp_values" class="container-fluid">
+
+
+        </div>
+    </div>
+</div>
+
+<div id="display_add_customer" class="overlay">
+    <div class="overlay-content">
+        <button class="btn btn-primary" onclick="close_add_customer();"> <i class="feather-24" data-feather="arrow-left"></i></button>
+
+        <fieldset class="add_customer">
+ <br>
+
+            <div class="container-fluid">
+        <form method="POST">
+                <div class="row">
+                    <div class="col-lg-3 h6 text-end">
+                       Name:
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="new_customer_prename" placeholder="Vorname(n)" required>
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3"></div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="new_customer_surname" placeholder="Nachname" required>
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h6 text-end">
+                       E-Mail:
+                    </div>
+                    <div class="col-lg-9">
+                        <input class="form-control border border-dark" name="new_customer_email" placeholder="example@tux.com">
+
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h6 text-end">
+                       Telefon:
+                    </div>
+                    <div class="col-lg-9">
+                       <input class="form-control border border-dark" name="new_customer_phone_number" placeholder="112">
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3 h6 text-end">
+                       Adresse:
+                    </div>
+                    <div class="col-lg-9">
+                        <textarea class="form-control border border-dark" name="new_customer_address" placeholder="Adresse" rows="3"></textarea>
+                    </div>
+                </div>
+<br>
+                <div class="row">
+                    <div class="col-lg-3"> </div>
+                    <div class="col-lg-9"> <button type="submit" class="btn btn-primary">Hinzufügen</button></div>
+                </div>
+            <input type="hidden" name="add_customer" value="1">
+            </form>
+            </div>
+<br>
+</fieldset>
+</div>
+</div>
+
+<script>
+
+$(document).ready(function(){
+    $('#base_sidebar').hide();
+});
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+const open_add_customer=async() => {
+    $("#display_customers").css("width", "0%");
+    await delay(500);
+    $("#display_add_customer").css("width","100%");
+}
+
+const close_add_customer=async() => {
+    $("#display_add_customer").css("width","0%");
+    await delay(500);
+    $("#display_customers").css("width", "100%");
+}
+
+function open_display_customers() {
+ $("#display_customers").css("width", "100%");
+}
+
+function close_display_customers() {
+  $("#display_customers").css("width", "0%");
+}
+
+function ajax_search(search_value){
+
+    if(search_value){
+        $('#all_values').hide();
+
+        //console.log(search_value);
+
+        $.ajax({
+        		url: "{{ url_for( 'repair_bp.ajax_customer_search' ) }}",
+        		type: "GET",
+        		data: {'search_value': search_value},
+        		success: function(resp){
+
+                    if(resp=='error'){
+					    $('#ajax_flash_danger').show();
+					    $('#ajax_flash_danger_msg').html("Fehler bei der Suche nach Ersatzteilen (ajax_customer_search)");
+                        return;
+					}
+
+                    if(resp=="empty"){
+                        $('#ajax_resp_values').html("<p> Kein Kundeneintrag gefunden </p>");
+                    }else{
+
+                        html_str="";
+
+        			    for(const element of resp){
+        			        html_str+=`<div class="row"> <div class="col-lg-6">`;
+        			        html_str+=`<form method="POST"> <input type="hidden" name="customer_id" value=`;
+                            html_str+=element["id"]+">";
+                            html_str+="<button type=\"submit\" class=\"contactbtn\">";
+                            html_str+="<p>"+element["id"] +"</p>";
+                            html_str+="<p>"+element["name"] +"</p>";
+                            html_str+="<p>"+element["email"] +"</p>";
+                            html_str+="<p>"+element["phone_number"] +"</p>";
+                            html_str+="<p>"+element["address"] +"</p>";
+                            html_str+="</button> </form></div> <div class=\"col-lg-6\"></div> </div>";
+        		        }// eo for
+
+        		        $('#ajax_resp_values').html(html_str);
+
+        		    }//eo else
+
+        		}
+        	});
+
+        $('#ajax_resp_values').show();
+
+    }else{
+         $('#all_values').show();
+         $('#ajax_resp_values').hide();
+    }
+
+}
+
+</script>
+
+{%endblock%}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container-fluid bg-white w-50 m-5 p-5">
+    <div class="row mb-5">
+        <div class="col-lg-2 h4">
+            Kunde:
+        </div>
+
+        <div class="col-lg-3">
+            {% for c in customer %}
+                {{c}},
+            {% endfor %}
+
+        </div>
+
+        <div class="col-lg-8">
+
+        </div>
+
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-2 h4">
+            Gerät:
+        </div>
+
+        <div class="col-lg-3">
+            {% for i in item %}
+                {% if i is not none %}  {{i}}, {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="col-lg-8"></div>
+
+    </div>
+
+    <div class="row mb-3 pb-3 border-bottom border-secondary">
+        <div class="col-lg-2 h4">
+            Service:
+        </div>
+
+        <div class="col-lg-8">
+            {% for s in service %}
+                {% if s is not none %}  {{s}}, {% endif %}
+            {% endfor %}
+        </div>
+        <div class="col-lg-2"></div>
+    </div>
+
+
+    {% if session['order_created'] %}
+
+    <div class="row">
+        <div class="col-lg-1"> </div>
+        <div class="col-lg-4"><p>Auftrag (ID: {{session['order_created']}}) erstellt</p></div>
+        <div class="col-lg-3">
+            <form method="POST">
+            <button class="btn btn-primary" name="ok">
+                OK
+            </button>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="row">
+        <div class="col-lg-2"> </div>
+
+        <div class="col-lg-4">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#create_order">
+                <i class="feather-16" data-feather="check-circle"></i>
+                Auftrag Erstellen
+            </button>
+        </div>
+
+        <div class="col-lg-2"> </div>
+        <div class="col-lg-4">
+            <form method="POST">
+            <button class="btn btn-danger" name="abort">
+                 <i class="feather-16" data-feather="x-circle"></i>
+                Abbrechen (Gerät löschen)
+            </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Modal create_order repair_order description -->
+     <div class="modal fade" id="create_order" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+       <div class="modal-dialog">
+         <div class="modal-content">
+           <div class="modal-header">
+             <h5 class="modal-title d-flex align-self-center" > Auftrag - Beschreibung </h5>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+           </div>
+           <form method="POST">
+           <div class="modal-body">
+
+               <div class="container-fluid">
+                   <textarea class="form-control border border-secondary" name="description" rows="6"></textarea>
+               </div>
+
+           </div>
+           <div class="modal-footer d-flex justify-content-center">
+
+                 <button type="submit" name="create_order" class="btn btn-success">Erstellen</button>
+           </div>
+           </form>
+         </div>
+       </div>
+     </div>
+
+{%endblock%}

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block head %} {%endblock%}
+
+{% block body %}
+
+<div class="container bg-white border border-dark m-3">
+    <div class="row mt-3 mb-3 d-flex align-items-center">
+        <div class="col">
+            <button  type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_purchase"> <i class="feather-16" data-feather="plus-circle"></i>  Neu </button>
+        </div>
+        <div class="col"></div>
+        <div class="col">
+                {%if last_date is defined or last_id is defined%}
+                <form action="{{ url_for('purchase_sale_bp.purchase')}}">
+                    <button type="submit" class="btn btn-primary">alle anzeigen</button>
+
+                </form>
+                {%endif%}
+
+        </div>
+
+        <div class="col">
+
+        <form method="get">
+        <div class="input-group">
+
+            <div class="form-outline">
+              <input type="date" name="date" {%if last_date is defined%} value="{{last_date}}" {%endif%} class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="feather-16 text-white" data-feather="search"></i>
+            </button>
+
+        </div>
+        </form>
+    </div>
+
+    <div class="col-lg-3">
+        <form method="get">
+        <div class="input-group ">
+            <div class="form-outline">
+              <input type="search" name="id" class="form-control " {%if last_id is defined%} value="{{last_id}}" {%endif%} placeholder="Identifikator" />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="feather-16 text-white" data-feather="search"></i>
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col">
+        {% if pagination is defined and pagination.links != '' %} {{ pagination.info | safe }} {%endif%}
+        </div>
+
+    </div>
+
+{% if purchase_dict %}
+    {% for purchase in purchase_dict %}
+
+        <div class="row d-flex align-items-center mt-3 pb-3 border-bottom border-secondary">
+            <div class="small">{% if pagination is defined %} {{loop.index + pagination.skip}} {%endif%}</div>
+            <div class="col"></div>
+            <div class="col-lg-2 text-center ">{{purchase.identifier}}</div>
+            <div class="col-lg-2 text-center ">{{purchase.price}} €</div>
+            <div class="col-lg-3 text-center "><b>{{purchase.date}}</b> ({{purchase.created_by}})</div>
+            <div class="col-lg-2 text-center">{{purchase.supplier}}</div>
+            <div class="col"></div>
+            {% if current_user.admin_role == 1 %}
+            <div class="col-lg-1">
+                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_purchase{{purchase.ID}}" type="button">
+                    <i class="feather-16" data-feather="trash-2"></i>
+                </button>
+            </div>
+            {%endif%}
+        </div>
+
+
+            <!-- Modal delete purchase -->
+            <div class="modal fade" id="delete_purchase{{purchase.ID}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" >Sicherheitsabfrage</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Soll der Einkauf vom {{purchase.date}} wirklich gelöscht werden?
+                  </div>
+                  <div class="modal-footer">
+                        <form method="post">
+                            <button class="btn btn-danger" value="{{purchase.ID}}" name="delete_purchase" type="submit" >
+                                Ja
+                            </button>
+                        </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nein</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+        {%endfor%}
+        <div class="d-flex mt-3 float-start">  {% if pagination is defined %} {{ pagination.links }} {%endif%} </div>
+    {%else%}
+        <p>Es wurden noch keine Einkäufe eingetragen.</p>
+    {%endif%}
+                <!-- Modal -->
+                <div class="modal fade" id="add_purchase" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <form method="POST">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Einkauf hinzufügen</h5>
+                        <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+							<div class="row mt-3">
+							     <div class="col-lg-1"></div>
+							     <div class="col-lg-5 h6">Gesamtpreis (€): </div>
+							     <div class="col-lg-5">
+                                     <input class="form-control" name="price" type="text" pattern="[0-9]{1,4},[0-9]{2}" placeholder="10,00" required>
+                                 </div>
+							     <div class="col-lg-1"></div>
+							 </div>
+
+                          	<div class="row mt-3">
+							     <div class="col-lg-1"></div>
+							     <div class="col-lg-5 h6">Einkauf bei: </div>
+							     <div class="col-lg-5">
+                                     <input class="form-control"  type="text" name="supplier">
+                                 </div>
+							     <div class="col-lg-1"></div>
+							 </div>
+
+
+                            <div class="row mt-3">
+							     <div class="col-lg-1"></div>
+							     <div class="col-lg-5 h6">Eigener Identifikator (Lieferschein-Nr o.ä.)</div>
+							     <div class="col-lg-5">
+							      <input class="form-control"  type="text" name="identifier">
+							     </div>
+							     <div class="col-lg-1"></div>
+							</div>
+
+                      </div>
+                      <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Hinzufügen</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                      </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+</div>
+{%endblock%}
